@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL15BB37L1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DL15BB37L1');
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kansas Soil Water</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0c0e13; }
+    #map { position: absolute; inset: 0; }
+
+    .panel {
+      position: absolute; z-index: 1000;
+      background: rgba(10, 12, 20, 0.80);
+      backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 13px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+    }
+    .label { font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.40); }
+    .mono  { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.35); }
+
+    #title { top: 18px; left: 18px; padding: 11px 16px; user-select: none; max-width: 430px; }
+    #title-row { display: flex; align-items: center; gap: 10px; }
+    #about-toggle { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: rgba(255,255,255,0.45); }
+    #about-toggle:hover { color: rgba(255,255,255,0.9); }
+    #about { display: none; margin-top: 9px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.75); max-height: calc(100vh - 340px); overflow-y: auto; }
+    #about b { font-weight: 500; color: rgba(255,255,255,0.9); }
+    #about p + p { margin-top: 6px; }
+    #title.open #about { display: block; }
+    #station-row { margin-top: 9px; display: flex; align-items: center; gap: 8px; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer; }
+    #station-row input { accent-color: #f0885a; }
+    .leaflet-tooltip { background: rgba(10,12,20,0.92); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.12); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .leaflet-tooltip-top:before { border-top-color: rgba(10,12,20,0.92); }
+    #title-main { font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,0.85); }
+    #title-sub  { margin-top: 3px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11px; letter-spacing: 0.02em; color: rgba(255,255,255,0.45); }
+
+    #controls { top: 18px; left: 50%; transform: translateX(-50%); padding: 8px 12px; display: flex; align-items: center; gap: 4px; }
+    .btn {
+      display: flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px;
+      font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 16px; line-height: 1;
+      color: rgba(255,255,255,0.55); cursor: pointer; user-select: none; white-space: nowrap; transition: background .13s, color .13s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.11); color: rgba(255,255,255,0.90); }
+    .btn-label { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 12px; }
+    .btn.active { background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.22); }
+    .sep { width: 1px; height: 20px; background: rgba(255,255,255,0.09); margin: 0 3px; }
+    #date-input {
+      height: 32px; min-width: 140px; padding: 0 10px; outline: none; cursor: pointer; color-scheme: dark;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; background: rgba(255,255,255,0.06);
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.88);
+    }
+
+    #colorbar { top: 18px; right: 18px; padding: 12px 18px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; }
+    #colorbar-canvas { display: block; width: 220px; height: 11px; border-radius: 5px; }
+    #colorbar-labels { width: 220px; display: flex; justify-content: space-between; }
+
+    /* statewide time series: full-width bottom panel */
+    #charts { bottom: 18px; left: 18px; right: 18px; padding: 10px 14px 8px; }
+    #charts.collapsed .chart-body { display: none; }
+    #charts-head { display: flex; align-items: center; gap: 12px; user-select: none; }
+    #charts-head .label { color: rgba(255,255,255,0.60); }
+    #charts-head .btn { height: 26px; }
+    #var-buttons { display: flex; gap: 4px; }
+    #charts-value { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.90); }
+    #charts-toggle { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.40); padding: 0 4px; }
+    .chart-body { position: relative; height: 190px; margin-top: 6px; }
+    #chart { width: 100%; height: 100%; }
+    #charts-note { margin-top: 4px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11.5px; letter-spacing: 0; color: rgba(255,255,255,0.55); }
+    .leaflet-bottom { bottom: 260px; }                 /* keep Leaflet attribution above the chart panel */
+
+    #status { position: absolute; z-index: 1002; top: 66px; left: 50%; transform: translateX(-50%); padding: 7px 16px; border-radius: 9px; background: rgba(190,50,50,0.85); font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: #fff; display: none; white-space: nowrap; }
+    #loading { position: absolute; z-index: 1002; top: 50%; left: 50%; transform: translate(-50%,-50%); padding: 14px 22px; border-radius: 13px; background: rgba(10,12,20,0.90); border: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; letter-spacing: 0.10em; color: rgba(255,255,255,0.55); display: none; align-items: center; gap: 11px; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.10); border-top-color: rgba(255,255,255,0.60); border-radius: 50%; animation: spin .65s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .leaflet-image-layer { transition: opacity .30s ease; }
+    .leaflet-tile-pane { filter: grayscale(1) invert(1) brightness(0.55) contrast(1.1); }   /* dark basemap from standard OSM tiles */
+    .leaflet-control-attribution { background: rgba(0,0,0,0.50) !important; color: rgba(255,255,255,0.30) !important; font-size: 9px !important; }
+    .leaflet-control-attribution a { color: rgba(255,255,255,0.40) !important; }
+    .leaflet-control-zoom { border: 1px solid rgba(255,255,255,0.10) !important; border-radius: 11px !important; overflow: hidden; }
+    .leaflet-control-zoom a { background: rgba(10,12,20,0.88) !important; color: rgba(255,255,255,0.60) !important; border-color: rgba(255,255,255,0.08) !important; width: 30px !important; height: 30px !important; line-height: 30px !important; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="panel" id="title">
+  <div id="title-row"><div>
+    <div id="title-main">Kansas Soil Water</div>
+    <div id="title-sub">Fraction of available water, top 50 cm &nbsp;·&nbsp; 1 km &nbsp;·&nbsp; daily</div>
+  </div><span id="about-toggle" title="How the map is made">&#9432;</span></div>
+  <label id="station-row"><input type="checkbox" id="station-toggle"> Show Mesonet stations</label>
+  <div id="about">
+    <p><b>Model.</b> Each 1-km pixel is a simple water balance of the top 50 cm of soil, tracked as the fraction of plant-available water between the wilting point and field capacity. Daily PRISM rainfall, less 5 mm of canopy and litter interception, fills the profile; a seasonal drying rate then draws it down. That rate was derived from the drydowns recorded by the Kansas Mesonet soil moisture network on rain-free days: about 0.5% of the available water per day in January and about 4% per day in July.</p>
+    <p><b>Soils.</b> The wilting point and field capacity of each pixel are estimated from SSURGO clay, sand and bulk density with a pedotransfer function. Compared with the limits the stations themselves reach, this gives an error of roughly 20 mm; about half of the remaining station-to-station differences are local and cannot be resolved by any soil map.</p>
+    <p><b>Anchoring to the network.</b> Every day the map is compared with the stations. The mismatch of the last three days is interpolated into a smooth surface, strongest near stations and fading to nothing far from them, and 30% of it is applied to the map. This relaxes the map toward the measurements over a few days, removing persistent bias without copying day-to-day sensor noise. Sensors in frozen soil are ignored. Against the network the map has a median correlation of 0.89 and an unbiased error of 0.12.</p>
+    <p><b>Reading the map.</b> Each daily map shows the soil water as of 6 AM CST on its date, the close of the PRISM rainfall day; the station readings are taken at that same instant. 0 is wilting point, 1 is field capacity. Station markers show each station's reading as the fraction of its own observed range (1st to 99th percentile of its record), on the same colour scale. The statewide chart compares the spatial mean of the map with the network mean, shown only when at least 30 stations report. Water stored is the sum over the state of the water held in the top 50 cm, in cubic kilometres.</p>
+  </div>
+</div>
+
+<div class="panel" id="controls">
+  <button class="btn" id="btn-mo-prev"  title="Back 1 month">«</button>
+  <button class="btn" id="btn-wk-prev"  title="Back 1 week (↓)">‹‹</button>
+  <button class="btn" id="btn-day-prev" title="Back 1 day (←)">‹</button>
+  <div class="sep"></div>
+  <input type="date" id="date-input" autocomplete="off"/>
+  <div class="sep"></div>
+  <button class="btn" id="btn-day-next" title="Forward 1 day (→)">›</button>
+  <button class="btn" id="btn-wk-next"  title="Forward 1 week (↑)">››</button>
+  <button class="btn" id="btn-mo-next"  title="Forward 1 month">»</button>
+  <div class="sep"></div>
+  <button class="btn btn-label" id="btn-latest" title="Jump to the latest map">Latest</button>
+</div>
+
+<div id="status"></div>
+
+<div class="panel" id="colorbar">
+  <div class="label">Fraction of available water</div>
+  <canvas id="colorbar-canvas" width="220" height="11"></canvas>
+  <div id="colorbar-labels" class="mono"><span>0</span><span>0.2</span><span>0.4</span><span>0.6</span><span>0.8</span><span>1</span></div>
+</div>
+
+<!-- Statewide time series. Hover for values, click to jump the map to that day. -->
+<div class="panel" id="charts">
+  <div id="charts-head">
+    <span class="label">Statewide</span>
+    <div id="var-buttons"></div>
+    <span id="charts-value"></span>
+    <span id="charts-toggle" title="Collapse">−</span>
+  </div>
+  <div class="chart-body"><canvas id="chart"></canvas></div>
+  <div id="charts-note"></div>
+</div>
+
+<div id="loading"><div class="spinner"></div><span>Loading map…</span></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+
+// ── configuration ──────────────────────────────────────────────────────────
+const MAPS_PATH    = 'png/';                                   // faw_YYYYMMDD.png, written by the operational notebook (write_png)
+const BOUNDS       = [[36.99262, -102.05760], [40.01096, -94.58362]];   // [[south, west], [north, east]] of the model grid (mask.tif)
+const SUMMARY_URL  = 'summary.csv';                            // date, faw_map, storage_km3, faw_stations, n_stations
+const COUNTIES_URL = 'boundaries/kansas_county_bnd.geojson';
+const MIN_DATE = new Date('2017-10-15T12:00:00');
+const STORAGE_FLOOR_KM3 = 17.0, STORAGE_CEILING_KM3 = 39.6;   // state totals at wilting point / field capacity (printed by analysis.ipynb, Figure 7)
+const MIN_STATIONS = 30;                                       // station mean is shown only when at least this many stations report
+
+// Variables offered in the chart. Each reads columns of summary.csv; add a row here to add a variable.
+const VARIABLES = {
+  faw: { label: 'Available water', y: 'FAW', min: 0, max: 1, fmt: v => v.toFixed(2),
+         line: { col: 'faw_map', name: 'map, spatial mean' }, dots: { col: 'faw_stations', name: 'stations, mean' },
+         note: 'Line: spatial mean of the map. Dots: mean of the Kansas Mesonet stations, shown when at least ' + MIN_STATIONS + ' report (fewer in freezing spells).' },
+  km3: { label: 'Water stored', y: 'km³', min: STORAGE_FLOOR_KM3, max: STORAGE_CEILING_KM3, fmt: v => v.toFixed(1) + ' km³',
+         line: { col: 'storage_km3', name: 'water stored in the top 50 cm' }, ref: { value: STORAGE_CEILING_KM3, name: 'field capacity' },
+         note: 'Axis floor: state total with every pixel at wilting point. Dashed: state total at field capacity.' },
+  n:   { label: 'Stations', y: 'stations', min: 0, max: 100, fmt: v => v.toFixed(0),
+         line: { col: 'n_stations', name: 'stations reporting' }, note: 'Number of Mesonet stations with a valid, unfrozen profile that day.' },
+};
+
+// ── Spectral colormap, 0..1 ────────────────────────────────────────────────
+const STOPS = [[0,[158,1,66]],[25,[213,62,79]],[51,[244,109,67]],[76,[253,174,97]],[102,[254,224,139]],[128,[255,255,191]],
+               [153,[230,245,152]],[178,[171,221,164]],[204,[102,194,165]],[229,[50,136,189]],[255,[94,79,162]]];
+const CMAP = new Uint8Array(256 * 3);
+for (let v = 0, s = 0; v <= 255; v++) {
+  while (s < STOPS.length - 2 && v > STOPS[s + 1][0]) s++;
+  const [v0, c0] = STOPS[s], [v1, c1] = STOPS[s + 1], t = (v - v0) / (v1 - v0);
+  for (let k = 0; k < 3; k++) CMAP[v * 3 + k] = (c0[k] + t * (c1[k] - c0[k])) | 0;
+}
+const rgb = ci => `rgb(${CMAP[ci*3]},${CMAP[ci*3+1]},${CMAP[ci*3+2]})`;
+
+// ── dates ──────────────────────────────────────────────────────────────────
+const toISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fromISO = s => new Date(s + 'T12:00:00');
+function yesterday() { const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(12,0,0,0); return d; }
+let latest = yesterday();                                          // replaced by the last date in summary.csv once it loads
+const clamp = d => d < MIN_DATE ? new Date(MIN_DATE) : (d > latest ? new Date(latest) : d);
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return clamp(x); };
+const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return clamp(x); };
+
+// ── map ────────────────────────────────────────────────────────────────────
+const map = L.map('map', { center: [38.5, -98.35], zoom: 7, minZoom: 5, maxZoom: 12 });
+map.createPane('rasterPane').style.zIndex = 350; map.createPane('countiesPane').style.zIndex = 420;
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 }).addTo(map);
+fetch(COUNTIES_URL).then(r => r.json()).then(g => L.geoJSON(g, { pane: 'countiesPane', style: { color: 'rgba(160,185,220,0.45)', weight: 0.9, fill: false } }).addTo(map)).catch(() => {});
+
+let overlay = null;
+const loadingEl = document.getElementById('loading'), statusEl = document.getElementById('status');
+let statusTimer;
+function showError(msg) { clearTimeout(statusTimer); statusEl.textContent = msg; statusEl.style.display = 'block'; statusTimer = setTimeout(() => statusEl.style.display = 'none', 4000); }
+
+function loadMap(date) {
+  loadingEl.style.display = 'flex'; statusEl.style.display = 'none';
+  const next = L.imageOverlay(MAPS_PATH + `faw_${toISO(date).replace(/-/g, '')}.png`, BOUNDS, { pane: 'rasterPane', opacity: 0, interactive: false });
+  next.on('load', () => { next.setOpacity(1); if (overlay) { const old = overlay; setTimeout(() => map.removeLayer(old), 320); } overlay = next; loadingEl.style.display = 'none'; });
+  next.on('error', () => { map.removeLayer(next); loadingEl.style.display = 'none'; showError(`No map for ${toISO(date)}`); });
+  next.addTo(map);
+}
+
+// ── date controls ──────────────────────────────────────────────────────────
+const dateInput = document.getElementById('date-input');
+let currentDate = yesterday();
+dateInput.min = toISO(MIN_DATE); dateInput.max = toISO(yesterday());
+function setDate(d) { currentDate = d; dateInput.value = toISO(d); loadMap(d); updateMarker(); drawStations(); }
+const on = (id, fn) => document.getElementById(id).onclick = fn;
+on('btn-day-prev', () => setDate(addDays(currentDate, -1)));   on('btn-day-next', () => setDate(addDays(currentDate, 1)));
+on('btn-wk-prev',  () => setDate(addDays(currentDate, -7)));   on('btn-wk-next',  () => setDate(addDays(currentDate, 7)));
+on('btn-mo-prev',  () => setDate(addMonths(currentDate, -1))); on('btn-mo-next',  () => setDate(addMonths(currentDate, 1)));
+on('btn-latest',   () => setDate(new Date(latest)));
+dateInput.addEventListener('change', () => { if (dateInput.value) setDate(clamp(fromISO(dateInput.value))); });
+document.addEventListener('keydown', e => {
+  if (document.activeElement === dateInput) return;
+  const keys = { ArrowLeft: -1, ArrowRight: 1, ArrowDown: -7, ArrowUp: 7 };
+  if (e.key in keys) { e.preventDefault(); setDate(addDays(currentDate, keys[e.key])); }
+});
+
+// ── station markers (same colour scale as the map) ────────────────────────
+// residuals.csv (written by the operational notebook) holds, per station and day, the observed and modelled FAW at the station pixel.
+let stationData = null, stationMeta = null;
+const stationLayer = L.layerGroup().addTo(map), stationToggle = document.getElementById('station-toggle');
+map.createPane('stationPane').style.zIndex = 450;
+async function loadStations() {
+  if (stationData) return;
+  const [meta, res] = await Promise.all([fetch('ks_mesonet_stations.csv').then(r => r.text()), fetch('residuals.csv').then(r => r.text())]);
+  const mrows = meta.trim().split('\n').map(l => l.trim().split(',')), mh = mrows.shift();
+  stationMeta = Object.fromEntries(mrows.map(r => [r[mh.indexOf('STATION')], [parseFloat(r[mh.indexOf('LATITUDE')]), parseFloat(r[mh.indexOf('LONGITUDE')])]]));
+  stationData = {};
+  const rows = res.trim().split('\n'), h = rows.shift().trim().split(','), iD = h.indexOf('date'), iS = h.indexOf('STATION'), iO = h.indexOf('faw_obs'), iM = h.indexOf('faw_model');
+  for (const line of rows) { const r = line.trim().split(','); (stationData[r[iD]] ||= []).push([r[iS], parseFloat(r[iO]), parseFloat(r[iM])]); }
+}
+async function drawStations() {
+  stationLayer.clearLayers();
+  if (!stationToggle.checked) return;
+  await loadStations();
+  for (const [name, obs, mod] of stationData[toISO(currentDate)] || []) {
+    const ll = stationMeta[name]; if (!ll) continue;
+    const ci = Math.max(0, Math.min(255, Math.round(obs * 255)));
+    L.circleMarker(ll, { pane: 'stationPane', radius: 6, color: '#111', weight: 1.2, fillColor: rgb(ci), fillOpacity: 1 })
+      .bindTooltip(`<b>${name}</b><br>station ${obs.toFixed(2)} &nbsp;·&nbsp; map ${mod.toFixed(2)}`, { direction: 'top', offset: [0, -6] }).addTo(stationLayer);
+  }
+}
+stationToggle.addEventListener('change', drawStations);
+document.getElementById('about-toggle').onclick = () => document.getElementById('title').classList.toggle('open');
+
+// ── colorbar ───────────────────────────────────────────────────────────────
+(() => { const c = document.getElementById('colorbar-canvas'), g = c.getContext('2d');
+  for (let x = 0; x < c.width; x++) { g.fillStyle = rgb(Math.round(x / (c.width - 1) * 255)); g.fillRect(x, 0, 1, c.height); } })();
+
+// ── statewide chart (Chart.js) ─────────────────────────────────────────────
+// summary.csv is written by the operational notebook (one row per day) and rebuilt by analysis.ipynb (Figure 6).
+let S = null, chart = null, variable = 'faw';
+const markerPlugin = {                                             // vertical line at the selected day
+  id: 'marker',
+  afterDraw(c) {
+    if (!S) return;
+    const i = S.index[toISO(currentDate)]; if (i === undefined) return;
+    const x = c.scales.x.getPixelForValue(i), { top, bottom } = c.chartArea, g = c.ctx;
+    g.save(); g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, top); g.lineTo(x, bottom); g.stroke(); g.restore();
+  },
+};
+
+fetch(SUMMARY_URL).then(r => r.text()).then(txt => {
+  const rows = txt.trim().split('\n').map(l => l.trim().split(',')), head = rows.shift();
+  const col = name => rows.map(r => { const v = parseFloat(r[head.indexOf(name)]); return isFinite(v) ? v : null; });
+  S = { dates: rows.map(r => r[0]), index: {} };
+  head.slice(1).forEach(name => S[name] = col(name));
+  S.faw_stations = S.faw_stations.map((v, i) => S.n_stations[i] >= MIN_STATIONS ? v : null);
+  S.dates.forEach((d, i) => S.index[d] = i);
+  latest = fromISO(S.dates[S.dates.length - 1]); dateInput.max = S.dates[S.dates.length - 1];     // the last day that has a map
+  buildButtons(); buildChart();
+  setDate(new Date(latest));                                                                   // boot on the last day that has a map
+}).catch(() => { document.getElementById('charts').style.display = 'none'; setDate(yesterday()); });
+
+function buildButtons() {
+  const box = document.getElementById('var-buttons');
+  for (const [key, v] of Object.entries(VARIABLES)) {
+    const b = document.createElement('button'); b.className = 'btn btn-label' + (key === variable ? ' active' : ''); b.textContent = v.label; b.dataset.key = key;
+    b.onclick = () => { variable = key; [...box.children].forEach(x => x.classList.toggle('active', x.dataset.key === key)); buildChart(); };
+    box.appendChild(b);
+  }
+}
+
+function buildChart() {
+  const v = VARIABLES[variable], datasets = [];
+  if (v.dots) datasets.push({ label: v.dots.name, data: S[v.dots.col], type: 'scatter', pointRadius: 1.3, pointHoverRadius: 3, backgroundColor: 'rgba(255,255,255,0.65)', order: 1 });
+  datasets.push({ label: v.line.name, data: S[v.line.col], borderColor: '#f0885a', borderWidth: 1.3, pointRadius: 0, pointHoverRadius: 3, fill: v.min === STORAGE_FLOOR_KM3 ? { target: 'start', above: 'rgba(240,136,90,0.12)' } : false, spanGaps: false, order: 2 });
+  if (v.ref) datasets.push({ label: v.ref.name, data: S.dates.map(() => v.ref.value), borderColor: 'rgba(255,255,255,0.4)', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, pointHoverRadius: 0, order: 3 });
+  document.getElementById('charts-note').textContent = v.note;
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('chart'), {
+    type: 'line', data: { labels: S.dates, datasets }, plugins: [markerPlugin],
+    options: {
+      animation: false, responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      onClick: (e, els, c) => { const i = Math.round(c.scales.x.getValueForPixel(e.x)); if (S.dates[i]) setDate(fromISO(S.dates[i])); },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: 'rgba(255,255,255,0.75)', font: { family: 'JetBrains Mono', size: 11 }, autoSkip: false, maxRotation: 0,
+             callback: (val, i) => S.dates[i].endsWith('-01-01') ? S.dates[i].slice(0, 4) : null } },
+        y: { min: v.min, max: v.max, title: { display: true, text: v.y, color: 'rgba(255,255,255,0.75)', font: { family: 'Inter', size: 12 } },
+             grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: 'rgba(255,255,255,0.75)', font: { family: 'JetBrains Mono', size: 11 }, maxTicksLimit: 5 } },
+      },
+      plugins: {
+        legend: { display: true, position: 'top', align: 'end', labels: { color: 'rgba(255,255,255,0.8)', boxWidth: 10, boxHeight: 2, font: { family: 'Inter', size: 12 } } },
+        tooltip: { backgroundColor: 'rgba(10,12,20,0.92)', titleFont: { family: 'JetBrains Mono', size: 12 }, bodyFont: { family: 'JetBrains Mono', size: 12 },
+                   filter: item => item.dataset.pointHoverRadius > 0 && item.raw != null, callbacks: { label: item => ` ${item.dataset.label}: ${v.fmt(item.raw)}` } },
+      },
+    },
+  });
+  updateMarker();
+}
+
+function updateMarker() {
+  if (!chart) return;
+  const v = VARIABLES[variable], i = S.index[toISO(currentDate)], val = i === undefined ? null : S[v.line.col][i];
+  document.getElementById('charts-value').textContent = val == null ? '' : `${toISO(currentDate)}  ${v.fmt(val)}`;
+  chart.draw();
+}
+
+document.getElementById('charts-toggle').onclick = () => {
+  const p = document.getElementById('charts'), collapsed = p.classList.toggle('collapsed');
+  document.getElementById('charts-toggle').textContent = collapsed ? '+' : '−';
+  document.querySelector('.leaflet-bottom').style.bottom = collapsed ? '70px' : '260px';
+};
+
+</script>
+</body>
+</html>

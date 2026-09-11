@@ -1,0 +1,14 @@
+# Allowlist: ignore everything, then re-admit only what the website needs.
+# Anything new in the folder (notebooks, rasters, keys, scratch files) stays out unless listed here.
+*
+!.gitignore
+!index.html
+!summary.csv
+!residuals.csv
+!ks_mesonet_stations.csv
+!boundaries/
+!boundaries/kansas_county_bnd.geojson
+!png/
+!png/faw_*.png
+!reports/
+!reports/latest.png
