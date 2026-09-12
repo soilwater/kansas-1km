@@ -31,14 +31,34 @@
     .label { font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.40); }
     .mono  { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.35); }
 
-    #title { top: 18px; left: 18px; padding: 11px 16px; user-select: none; max-width: 430px; }
-    #title-row { display: flex; align-items: center; gap: 10px; }
-    #about-toggle { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: rgba(255,255,255,0.45); }
-    #about-toggle:hover { color: rgba(255,255,255,0.9); }
+    #sidebar { top: 18px; left: 18px; width: 260px; padding: 12px 14px; user-select: none; display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 300px); overflow-y: auto; }
+    #sidebar-head { display: flex; align-items: flex-start; gap: 10px; }
+    #sidebar-toggle { margin-left: auto; flex: none; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 15px; line-height: 1; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 7px; transition: background .13s, color .13s; }
+    #sidebar-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    #date-controls { display: flex; flex-direction: column; gap: 6px; }
+    #date-arrows { display: flex; gap: 3px; }
+    #date-arrows .btn { flex: 1; padding: 0 4px; }
+    #date-row2 { display: flex; gap: 6px; }
+    .sb-collapsible { display: flex; flex-direction: column; gap: 12px; }
+    .sb-section { display: flex; flex-direction: column; gap: 6px; }
+    #sidebar.collapsed .sb-collapsible { display: none; }
+    #about-toggle { margin-top: 10px; align-self: flex-start; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.78); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); border-radius: 7px; padding: 5px 11px; white-space: nowrap; transition: background .13s, color .13s, border-color .13s; }
+    #about-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    #title.open #about-toggle { background: rgba(240,136,90,0.18); border-color: rgba(240,136,90,0.55); color: #fff; }
+    #about .tip { color: rgba(255,255,255,0.55); font-style: italic; }
+    #about a { color: #f0a883; }
+    /* value popup (click on the map) */
+    .leaflet-popup-content-wrap { background: rgba(10,12,20,0.93); color: #fff; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; box-shadow: 0 6px 22px rgba(0,0,0,0.5); }
+    .leaflet-popup-content { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; margin: 9px 12px; }
+    .leaflet-popup-content .big { font-size: 15px; font-weight: 600; }
+    .leaflet-popup-content .muted { color: rgba(255,255,255,0.5); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; }
+    .leaflet-popup-tip { background: rgba(10,12,20,0.93); }
+    .leaflet-popup-close-button { color: rgba(255,255,255,0.5) !important; }
+    .leaflet-container a.leaflet-popup-close-button:hover { color: #fff !important; }
     #about { display: none; margin-top: 9px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.75); max-height: calc(100vh - 340px); overflow-y: auto; }
     #about b { font-weight: 500; color: rgba(255,255,255,0.9); }
     #about p + p { margin-top: 6px; }
-    #title.open #about { display: block; }
+    #sidebar.about-open #about { display: block; }
     #station-row { margin-top: 9px; display: flex; align-items: center; gap: 8px; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer; }
     #station-row input { accent-color: #f0885a; }
     .leaflet-tooltip { background: rgba(10,12,20,0.92); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.12); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
@@ -46,7 +66,7 @@
     #title-main { font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,0.85); }
     #title-sub  { margin-top: 3px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11px; letter-spacing: 0.02em; color: rgba(255,255,255,0.45); }
 
-    #controls { top: 18px; left: 50%; transform: translateX(-50%); padding: 8px 12px; display: flex; align-items: center; gap: 4px; }
+    /* date/mode/colorbar/stations/about now live inside #sidebar */
     .btn {
       display: flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px;
       background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px;
@@ -58,14 +78,13 @@
     .btn.active { background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.22); }
     .sep { width: 1px; height: 20px; background: rgba(255,255,255,0.09); margin: 0 3px; }
     #date-input {
-      height: 32px; min-width: 140px; padding: 0 10px; outline: none; cursor: pointer; color-scheme: dark;
+      flex: 1; height: 32px; min-width: 0; padding: 0 10px; outline: none; cursor: pointer; color-scheme: dark;
       border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; background: rgba(255,255,255,0.06);
       font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.88);
     }
 
-    #colorbar { top: 18px; right: 18px; padding: 12px 18px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; }
-    #colorbar-canvas { display: block; width: 220px; height: 11px; border-radius: 5px; }
-    #colorbar-labels { width: 220px; display: flex; justify-content: space-between; }
+    #colorbar-canvas { display: block; width: 100%; height: 11px; border-radius: 5px; }
+    #colorbar-labels { width: 100%; display: flex; justify-content: space-between; }
 
     /* statewide time series: full-width bottom panel */
     #charts { bottom: 18px; left: 18px; right: 18px; padding: 10px 14px 8px; }
@@ -74,6 +93,7 @@
     #charts-head .label { color: rgba(255,255,255,0.60); }
     #charts-head .btn { height: 26px; }
     #var-buttons { display: flex; gap: 4px; }
+    #mode-buttons { display: flex; gap: 4px; }
     #charts-value { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.90); }
     #charts-toggle { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.40); padding: 0 4px; }
     .chart-body { position: relative; height: 190px; margin-top: 6px; }
@@ -97,41 +117,54 @@
 
 <div id="map"></div>
 
-<div class="panel" id="title">
-  <div id="title-row"><div>
-    <div id="title-main">Kansas Soil Water</div>
-    <div id="title-sub">Fraction of available water, top 50 cm &nbsp;·&nbsp; 1 km &nbsp;·&nbsp; daily</div>
-  </div><span id="about-toggle" title="How the map is made">&#9432;</span></div>
-  <label id="station-row"><input type="checkbox" id="station-toggle"> Show Mesonet stations</label>
-  <div id="about">
-    <p><b>Model.</b> Each 1-km pixel is a simple water balance of the top 50 cm of soil, tracked as the fraction of plant-available water between the wilting point and field capacity. Daily PRISM rainfall, less 5 mm of canopy and litter interception, fills the profile; a seasonal drying rate then draws it down. That rate was derived from the drydowns recorded by the Kansas Mesonet soil moisture network on rain-free days: about 0.3% of the available water per day in January and about 4.5% per day in July.</p>
-    <p><b>Soils.</b> The wilting point and field capacity of each pixel are estimated from SSURGO clay, sand and bulk density with a pedotransfer function. Compared with the limits the stations themselves reach, this gives an error of roughly 20 mm; about half of the remaining station-to-station differences are local and cannot be resolved by any soil map.</p>
-    <p><b>Anchoring to the network.</b> Every day the map is compared with the stations. The mismatch of the last three days is interpolated into a smooth surface, strongest near stations and fading to nothing far from them, and 30% of it is applied to the map. This relaxes the map toward the measurements over a few days, removing persistent bias without copying day-to-day sensor noise. Sensors in frozen soil are ignored. Against the network the map has a median correlation of 0.89 and an unbiased error of 0.12.</p>
-    <p><b>Reading the map.</b> Each daily map shows the soil water as of 6 AM CST on its date, the close of the PRISM rainfall day; the station readings are taken at that same instant. 0 is wilting point, 1 is field capacity. Station markers show each station's reading as the fraction of its own observed range (1st to 99th percentile of its record), on the same colour scale. The statewide chart compares the spatial mean of the map with the network mean, shown only when at least 30 stations report. Water stored is the sum over the state of the water held in the top 50 cm, in cubic kilometres.</p>
+<div class="panel" id="sidebar">
+  <div id="sidebar-head">
+    <div>
+      <div id="title-main">Kansas Soil Water</div>
+      <div id="title-sub">Fraction of available water, top 50 cm &nbsp;·&nbsp; 1 km &nbsp;·&nbsp; daily</div>
+    </div>
+    <button id="sidebar-toggle" title="Collapse panel">&#8249;</button>
+  </div>
+
+  <div id="date-controls">
+    <div id="date-arrows">
+      <button class="btn" id="btn-mo-prev"  title="Back 1 month">«</button>
+      <button class="btn" id="btn-wk-prev"  title="Back 1 week (↓)">‹‹</button>
+      <button class="btn" id="btn-day-prev" title="Back 1 day (←)">‹</button>
+      <button class="btn" id="btn-day-next" title="Forward 1 day (→)">›</button>
+      <button class="btn" id="btn-wk-next"  title="Forward 1 week (↑)">››</button>
+      <button class="btn" id="btn-mo-next"  title="Forward 1 month">»</button>
+    </div>
+    <div id="date-row2">
+      <input type="date" id="date-input" autocomplete="off"/>
+      <button class="btn btn-label" id="btn-latest" title="Jump to the latest map">Latest</button>
+    </div>
+  </div>
+
+  <div class="sb-collapsible">
+    <div class="sb-section">
+      <div class="label">Map</div>
+      <div id="mode-buttons" title="Show the value, or the change over a fixed number of days"></div>
+    </div>
+
+    <div class="sb-section" id="colorbar">
+      <div class="label">Fraction of available water</div>
+      <canvas id="colorbar-canvas" width="220" height="11"></canvas>
+      <div id="colorbar-labels" class="mono"><span>0</span><span>0.2</span><span>0.4</span><span>0.6</span><span>0.8</span><span>1</span></div>
+    </div>
+
+    <label id="station-row"><input type="checkbox" id="station-toggle"> Show Mesonet stations</label>
+
+    <button id="about-toggle" title="What this is and how it's made">About &amp; methods</button>
+    <div id="about">
+      <p><b>What this shows.</b> Each map shows the fraction of plant available water in the top 50&nbsp;cm of soil across Kansas, at 1&nbsp;km resolution, updated daily. 0 is the wilting point (plants can no longer extract any water) and 1 is field capacity (a full profile). Each map is the soil water as of 6&nbsp;AM&nbsp;CST on its date.</p>
+      <p><b>How it's made.</b> A daily soil water balance is driven by PRISM rainfall and a seasonal drying rate calibrated from the Kansas Mesonet, run on soil limits from USDA-SSURGO soil texture, and adjusted toward the same stations each day. Station markers (toggle above) show each station's reading on the same 0&ndash;1 scale.</p>
+      <p class="tip">Tip: click anywhere on the map to read the value at that point.</p>
+    </div>
   </div>
 </div>
 
-<div class="panel" id="controls">
-  <button class="btn" id="btn-mo-prev"  title="Back 1 month">«</button>
-  <button class="btn" id="btn-wk-prev"  title="Back 1 week (↓)">‹‹</button>
-  <button class="btn" id="btn-day-prev" title="Back 1 day (←)">‹</button>
-  <div class="sep"></div>
-  <input type="date" id="date-input" autocomplete="off"/>
-  <div class="sep"></div>
-  <button class="btn" id="btn-day-next" title="Forward 1 day (→)">›</button>
-  <button class="btn" id="btn-wk-next"  title="Forward 1 week (↑)">››</button>
-  <button class="btn" id="btn-mo-next"  title="Forward 1 month">»</button>
-  <div class="sep"></div>
-  <button class="btn btn-label" id="btn-latest" title="Jump to the latest map">Latest</button>
-</div>
-
 <div id="status"></div>
-
-<div class="panel" id="colorbar">
-  <div class="label">Fraction of available water</div>
-  <canvas id="colorbar-canvas" width="220" height="11"></canvas>
-  <div id="colorbar-labels" class="mono"><span>0</span><span>0.2</span><span>0.4</span><span>0.6</span><span>0.8</span><span>1</span></div>
-</div>
 
 <!-- Statewide time series. Hover for values, click to jump the map to that day. -->
 <div class="panel" id="charts">
@@ -184,6 +217,17 @@ for (let v = 0, s = 0; v <= 255; v++) {
 }
 const rgb = ci => `rgb(${CMAP[ci*3]},${CMAP[ci*3+1]},${CMAP[ci*3+2]})`;
 
+// ── RdBu diverging colormap for the change maps (red = drier, blue = wetter) ──
+const DSTOPS = [[0,[103,0,31]],[26,[178,24,43]],[51,[214,96,77]],[77,[244,165,130]],[102,[253,219,199]],[128,[247,247,247]],
+                [153,[209,229,240]],[179,[146,197,222]],[204,[67,147,195]],[230,[33,102,172]],[255,[5,48,97]]];
+const DMAP = new Uint8Array(256 * 3);
+for (let v = 0, s = 0; v <= 255; v++) {
+  while (s < DSTOPS.length - 2 && v > DSTOPS[s + 1][0]) s++;
+  const [v0, c0] = DSTOPS[s], [v1, c1] = DSTOPS[s + 1], t = (v - v0) / (v1 - v0);
+  for (let k = 0; k < 3; k++) DMAP[v * 3 + k] = (c0[k] + t * (c1[k] - c0[k])) | 0;
+}
+const drgb = ci => `rgb(${DMAP[ci*3]},${DMAP[ci*3+1]},${DMAP[ci*3+2]})`;
+
 // ── dates ──────────────────────────────────────────────────────────────────
 const toISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const fromISO = s => new Date(s + 'T12:00:00');
@@ -195,6 +239,7 @@ const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n
 
 // ── map ────────────────────────────────────────────────────────────────────
 const map = L.map('map', { center: [38.5, -98.35], zoom: 7, minZoom: 5, maxZoom: 12 });
+map.zoomControl.setPosition('topright');                            // top-left is the sidebar
 map.createPane('rasterPane').style.zIndex = 350; map.createPane('countiesPane').style.zIndex = 420;
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 }).addTo(map);
 fetch(COUNTIES_URL).then(r => r.json()).then(g => L.geoJSON(g, { pane: 'countiesPane', style: { color: 'rgba(160,185,220,0.45)', weight: 0.9, fill: false } }).addTo(map)).catch(() => {});
@@ -204,19 +249,133 @@ const loadingEl = document.getElementById('loading'), statusEl = document.getEle
 let statusTimer;
 function showError(msg) { clearTimeout(statusTimer); statusEl.textContent = msg; statusEl.style.display = 'block'; statusTimer = setTimeout(() => statusEl.style.display = 'none', 4000); }
 
-function loadMap(date) {
+function showOverlay(src) {                                        // src: a PNG url (value mode) or a canvas dataURL (change mode)
   loadingEl.style.display = 'flex'; statusEl.style.display = 'none';
-  const next = L.imageOverlay(MAPS_PATH + `faw_${toISO(date).replace(/-/g, '')}.png`, BOUNDS, { pane: 'rasterPane', opacity: 0, interactive: false });
+  const next = L.imageOverlay(src, BOUNDS, { pane: 'rasterPane', opacity: 0, interactive: false });
   next.on('load', () => { next.setOpacity(1); if (overlay) { const old = overlay; setTimeout(() => map.removeLayer(old), 320); } overlay = next; loadingEl.style.display = 'none'; });
-  next.on('error', () => { map.removeLayer(next); loadingEl.style.display = 'none'; showError(`No map for ${toISO(date)}`); });
+  next.on('error', () => { map.removeLayer(next); loadingEl.style.display = 'none'; showError(`No map for ${toISO(currentDate)}`); });
   next.addTo(map);
 }
+function loadMap(date) { showOverlay(MAPS_PATH + `faw_${toISO(date).replace(/-/g, '')}.png`); }
+
+// ── map display mode: value, or change over a fixed number of days ────────────
+// Add a lag by adding one row here; the button and the colorbar follow automatically.
+let mode = 'value', lag = 0;
+const MODES = [
+  { key: 'value', label: 'Value',   lag: 0 },
+  { key: 'd7',    label: 'Δ 7-day', lag: 7 },
+  //{ key: 'd1', label: 'Δ 1-day', lag: 1 }, { key: 'd15', label: 'Δ 15-day', lag: 15 }, { key: 'd30', label: 'Δ 30-day', lag: 30 },
+];
+function buildModeButtons() {
+  const box = document.getElementById('mode-buttons');
+  MODES.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'btn btn-label' + (m.key === mode ? ' active' : ''); b.textContent = m.label; b.dataset.key = m.key;
+    b.onclick = () => { mode = m.key; lag = m.lag; [...box.children].forEach(x => x.classList.toggle('active', x.dataset.key === m.key)); drawColorbar(); render(); };
+    box.appendChild(b);
+  });
+}
+function render() {                                                 // draw the current day in the current mode
+  map.closePopup();                                                 // a value/change readout is tied to one day and mode
+  if (mode === 'value') { loadMap(currentDate); loadSampler(currentDate); }
+  else renderDiff(currentDate, lag);
+  drawStations();
+}
+
+// ── pixel sampling: invert the Spectral PNG back to FAW ───────────────────────
+// The map is a paletted Spectral PNG with no antialiasing. We draw it to an offscreen canvas at
+// native resolution and invert each pixel's colour to FAW via CMAP. This powers both click-to-read
+// (value mode) and the difference maps (delta modes) — no extra data files are published.
+const samp = { canvas: document.createElement('canvas'), ctx: null, w: 0, h: 0, ready: false, url: '' };
+samp.ctx = samp.canvas.getContext('2d', { willReadFrequently: true });
+function loadSampler(date) {
+  const url = MAPS_PATH + `faw_${toISO(date).replace(/-/g, '')}.png`;
+  samp.ready = false; samp.url = url;
+  const im = new Image(); im.crossOrigin = 'anonymous';
+  im.onload = () => { if (samp.url !== url) return; samp.w = im.naturalWidth; samp.h = im.naturalHeight;
+    samp.canvas.width = samp.w; samp.canvas.height = samp.h; samp.ctx.imageSmoothingEnabled = false;
+    samp.ctx.clearRect(0, 0, samp.w, samp.h); samp.ctx.drawImage(im, 0, 0); samp.ready = true; };
+  im.onerror = () => { if (samp.url === url) samp.ready = false; };
+  im.src = url;
+}
+function nearestFAW(r, g, b) {                                      // closest colormap index, returned as FAW 0..1
+  let bi = 0, bd = Infinity;
+  for (let i = 0; i < 256; i++) { const dr = r-CMAP[i*3], dg = g-CMAP[i*3+1], db = b-CMAP[i*3+2], d = dr*dr+dg*dg+db*db; if (d < bd) { bd = d; bi = i; } }
+  return bi / 255;
+}
+const _fawMemo = new Map();                                         // a PNG holds <=251 distinct colours; memoise the nearest-colour search
+function fawFromRGB(r, g, b) { const key = (r<<16)|(g<<8)|b; let v = _fawMemo.get(key); if (v === undefined) { v = nearestFAW(r, g, b); _fawMemo.set(key, v); } return v; }
+
+// FAW grid for a day (Float32; NaN outside Kansas), cached by date — the input to the difference maps.
+const gridCache = new Map();
+function getGrid(date) {
+  const iso = toISO(date);
+  if (gridCache.has(iso)) return Promise.resolve(gridCache.get(iso));
+  return new Promise(resolve => {
+    const im = new Image(); im.crossOrigin = 'anonymous';
+    im.onload = () => {
+      const w = im.naturalWidth, h = im.naturalHeight, cv = document.createElement('canvas');
+      cv.width = w; cv.height = h; const cx = cv.getContext('2d', { willReadFrequently: true });
+      cx.imageSmoothingEnabled = false; cx.drawImage(im, 0, 0); const d = cx.getImageData(0, 0, w, h).data;
+      const faw = new Float32Array(w * h);
+      for (let i = 0, p = 0; i < faw.length; i++, p += 4) faw[i] = d[p+3] === 0 ? NaN : fawFromRGB(d[p], d[p+1], d[p+2]);
+      const grid = { w, h, faw }; gridCache.set(iso, grid); resolve(grid);
+    };
+    im.onerror = () => { gridCache.set(iso, null); resolve(null); };
+    im.src = MAPS_PATH + `faw_${iso.replace(/-/g, '')}.png`;
+  });
+}
+
+// ── difference map (delta modes): today minus N days earlier, on an RdBu scale ─
+const DELTA_MAX = 0.3;                                              // colour scale saturates at +/- this change in FAW
+let lastDiff = null;                                                // {w,h,delta,lag} for click-to-read
+async function renderDiff(date, lag) {
+  loadingEl.style.display = 'flex'; statusEl.style.display = 'none';
+  const earlier = new Date(date); earlier.setDate(earlier.getDate() - lag);
+  const [g0, g1] = await Promise.all([getGrid(date), getGrid(earlier)]);
+  if (mode === 'value') return;                                     // switched back while loading
+  if (!g0 || !g1 || g0.w !== g1.w || g0.h !== g1.h) { loadingEl.style.display = 'none'; showError(`No ${lag}-day change for ${toISO(date)}`); return; }
+  const { w, h } = g0, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const cx = cv.getContext('2d'), img = cx.createImageData(w, h), delta = new Float32Array(w * h);
+  for (let i = 0, p = 0; i < w * h; i++, p += 4) {
+    const a = g0.faw[i], b = g1.faw[i];
+    if (Number.isNaN(a) || Number.isNaN(b)) { delta[i] = NaN; img.data[p+3] = 0; continue; }
+    const dd = a - b; delta[i] = dd;
+    const ci = Math.round((Math.max(-DELTA_MAX, Math.min(DELTA_MAX, dd)) + DELTA_MAX) / (2 * DELTA_MAX) * 255) * 3;
+    img.data[p] = DMAP[ci]; img.data[p+1] = DMAP[ci+1]; img.data[p+2] = DMAP[ci+2]; img.data[p+3] = 255;
+  }
+  cx.putImageData(img, 0, 0); lastDiff = { w, h, delta, lag };
+  showOverlay(cv.toDataURL());
+}
+
+// ── click to read the value (or the change) under the cursor ──────────────────
+function pixelAt(lat, lng, w, h) {
+  const south = BOUNDS[0][0], west = BOUNDS[0][1], north = BOUNDS[1][0], east = BOUNDS[1][1];
+  if (lat < south || lat > north || lng < west || lng > east) return null;
+  return [Math.min(w-1, Math.floor((lng-west)/(east-west)*w)), Math.min(h-1, Math.floor((north-lat)/(north-south)*h))];
+}
+map.on('click', e => {
+  const { lat, lng } = e.latlng;
+  if (mode === 'value') {
+    if (!samp.ready) return;
+    const pt = pixelAt(lat, lng, samp.w, samp.h); if (!pt) return;
+    const d = samp.ctx.getImageData(pt[0], pt[1], 1, 1).data; if (d[3] === 0) return;
+    L.popup({ closeButton: true, autoPan: false }).setLatLng(e.latlng)
+      .setContent(`<span class="big">FAW ${nearestFAW(d[0], d[1], d[2]).toFixed(2)}</span><br><span class="muted">${lat.toFixed(3)}, ${lng.toFixed(3)} · ${toISO(currentDate)}</span>`).openOn(map);
+  } else {
+    if (!lastDiff) return;
+    const pt = pixelAt(lat, lng, lastDiff.w, lastDiff.h); if (!pt) return;
+    const dd = lastDiff.delta[pt[1]*lastDiff.w + pt[0]]; if (Number.isNaN(dd)) return;
+    L.popup({ closeButton: true, autoPan: false }).setLatLng(e.latlng)
+      .setContent(`<span class="big">${dd >= 0 ? '+' : '−'}${Math.abs(dd).toFixed(2)} FAW</span><br><span class="muted">${lastDiff.lag}-day change · ${lat.toFixed(3)}, ${lng.toFixed(3)}</span>`).openOn(map);
+  }
+});
 
 // ── date controls ──────────────────────────────────────────────────────────
 const dateInput = document.getElementById('date-input');
 let currentDate = yesterday();
 dateInput.min = toISO(MIN_DATE); dateInput.max = toISO(yesterday());
-function setDate(d) { currentDate = d; dateInput.value = toISO(d); loadMap(d); updateMarker(); drawStations(); }
+function setDate(d) { currentDate = d; dateInput.value = toISO(d); render(); updateMarker(); }
 const on = (id, fn) => document.getElementById(id).onclick = fn;
 on('btn-day-prev', () => setDate(addDays(currentDate, -1)));   on('btn-day-next', () => setDate(addDays(currentDate, 1)));
 on('btn-wk-prev',  () => setDate(addDays(currentDate, -7)));   on('btn-wk-next',  () => setDate(addDays(currentDate, 7)));
@@ -245,7 +404,7 @@ async function loadStations() {
 }
 async function drawStations() {
   stationLayer.clearLayers();
-  if (!stationToggle.checked) return;
+  if (mode !== 'value' || !stationToggle.checked) return;          // markers are absolute values; hide them on change maps
   await loadStations();
   for (const [name, obs, mod] of stationData[toISO(currentDate)] || []) {
     const ll = stationMeta[name]; if (!ll) continue;
@@ -255,11 +414,17 @@ async function drawStations() {
   }
 }
 stationToggle.addEventListener('change', drawStations);
-document.getElementById('about-toggle').onclick = () => document.getElementById('title').classList.toggle('open');
+document.getElementById('about-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('about-open');
 
-// ── colorbar ───────────────────────────────────────────────────────────────
-(() => { const c = document.getElementById('colorbar-canvas'), g = c.getContext('2d');
-  for (let x = 0; x < c.width; x++) { g.fillStyle = rgb(Math.round(x / (c.width - 1) * 255)); g.fillRect(x, 0, 1, c.height); } })();
+// ── colorbar (follows the map mode: FAW in value mode, RdBu change in delta modes) ──
+function drawColorbar() {
+  const c = document.getElementById('colorbar-canvas'), g = c.getContext('2d'), diff = mode !== 'value';
+  for (let x = 0; x < c.width; x++) { const ci = Math.round(x / (c.width - 1) * 255); g.fillStyle = diff ? drgb(ci) : rgb(ci); g.fillRect(x, 0, 1, c.height); }
+  document.querySelector('#colorbar .label').textContent = diff ? 'Change in available water (blue = wetter)' : 'Fraction of available water';
+  const labels = diff ? ['−0.3', '−0.15', '0', '+0.15', '+0.3'] : ['0', '0.2', '0.4', '0.6', '0.8', '1'];
+  document.getElementById('colorbar-labels').innerHTML = labels.map(s => `<span>${s}</span>`).join('');
+}
+buildModeButtons(); drawColorbar();
 
 // ── statewide chart (Chart.js) ─────────────────────────────────────────────
 // summary.csv is written by the operational notebook (one row per day) and rebuilt by analysis.ipynb (Figure 6).
@@ -330,11 +495,18 @@ function updateMarker() {
   chart.draw();
 }
 
-document.getElementById('charts-toggle').onclick = () => {
-  const p = document.getElementById('charts'), collapsed = p.classList.toggle('collapsed');
-  document.getElementById('charts-toggle').textContent = collapsed ? '+' : '−';
-  document.querySelector('.leaflet-bottom').style.bottom = collapsed ? '70px' : '260px';
-};
+function setChartsCollapsed(c) {
+  document.getElementById('charts').classList.toggle('collapsed', c);
+  document.getElementById('charts-toggle').textContent = c ? '+' : '−';
+  const lb = document.querySelector('.leaflet-bottom'); if (lb) lb.style.bottom = c ? '70px' : '260px';
+}
+document.getElementById('charts-toggle').onclick = () => setChartsCollapsed(!document.getElementById('charts').classList.contains('collapsed'));
+
+// ── sidebar collapse ─────────────────────────────────────────────────────────
+const sidebarEl = document.getElementById('sidebar'), sidebarToggle = document.getElementById('sidebar-toggle');
+sidebarToggle.onclick = () => { sidebarToggle.innerHTML = sidebarEl.classList.toggle('collapsed') ? '&#8250;' : '&#8249;'; };
+// Small screens: tuck the chrome away so the map owns the view (the date arrows stay visible).
+if (window.innerWidth < 760) { sidebarEl.classList.add('collapsed'); sidebarToggle.innerHTML = '&#8250;'; setChartsCollapsed(true); }
 
 </script>
 </body>
