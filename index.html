@@ -45,8 +45,8 @@
     #about-toggle { margin-top: 10px; align-self: flex-start; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.78); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); border-radius: 7px; padding: 5px 11px; white-space: nowrap; transition: background .13s, color .13s, border-color .13s; }
     #about-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
     #title.open #about-toggle { background: rgba(240,136,90,0.18); border-color: rgba(240,136,90,0.55); color: #fff; }
-    #about .tip { color: rgba(255,255,255,0.55); font-style: italic; }
     #about a { color: #f0a883; }
+    .tip { margin-top: 4px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11.5px; letter-spacing: 0; color: rgba(255,255,255,0.55); }
     /* value popup (click on the map) */
     .leaflet-popup-content-wrap { background: rgba(10,12,20,0.93); color: #fff; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; box-shadow: 0 6px 22px rgba(0,0,0,0.5); }
     .leaflet-popup-content { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; margin: 9px 12px; }
@@ -158,9 +158,8 @@
 
     <button id="about-toggle" title="What this is and how it's made">About &amp; methods</button>
     <div id="about">
-      <p><b>What this shows.</b> Each map shows the fraction of plant available water in the top 50&nbsp;cm of soil across Kansas, at 1&nbsp;km resolution, updated daily. 0 is the wilting point (plants can no longer extract any water) and 1 is field capacity (a full profile). Each map is the soil water as of 6&nbsp;AM&nbsp;CST on its date.</p>
-      <p><b>How it's made.</b> A daily soil water balance is driven by PRISM rainfall and a seasonal drying rate calibrated from the Kansas Mesonet, run on soil limits from USDA-SSURGO soil texture, and adjusted toward the same stations each day. Station markers (toggle above) show each station's reading on the same 0&ndash;1 scale.</p>
-      <p class="tip">Tip: click anywhere on the map to read the value at that point.</p>
+      <p><b>What this shows:</b> Each map shows the fraction of plant available water in the top 50&nbsp;cm of soil across Kansas, at 1&nbsp;km resolution, updated daily. 0 is the wilting point (plants can no longer extract any water) and 1 is field capacity (a full profile). Each map is the soil water as of 6&nbsp;AM&nbsp;CST on its date.</p>
+      <p><b>How it's made:</b> A daily soil water balance is driven by PRISM rainfall and a seasonal drying rate calibrated from the Kansas Mesonet, run on soil limits from USDA-SSURGO soil texture, and adjusted toward the same stations each day. Station markers (toggle above) show each station's reading on the same 0&ndash;1 scale.</p>
     </div>
   </div>
 </div>
@@ -175,6 +174,8 @@
     <span id="charts-value"></span>
     <span id="charts-toggle" title="Collapse">−</span>
   </div>
+  <div class="tip">Tip: click anywhere on the timeline below to load the map for the corresponding date.</div>
+
   <div class="chart-body"><canvas id="chart"></canvas></div>
   <div id="charts-note"></div>
 </div>
