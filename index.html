@@ -46,6 +46,19 @@
     #about-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
     #title.open #about-toggle { background: rgba(240,136,90,0.18); border-color: rgba(240,136,90,0.55); color: #fff; }
     #about a { color: #f0a883; }
+    /* references modal */
+    #refs-modal { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+    #refs-modal.open { display: flex; }
+    #refs-card { position: relative; width: 100%; max-width: 640px; max-height: 82vh; overflow-y: auto; padding: 22px 26px; background: rgba(14,17,26,0.98); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; box-shadow: 0 16px 52px rgba(0,0,0,0.6); }
+    #refs-card h3 { font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+    #refs-card .refs-sub { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: rgba(255,255,255,0.5); margin: 4px 0 16px; }
+    #refs-card ol { list-style: none; counter-reset: r; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+    #refs-card li { position: relative; padding-left: 28px; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.82); }
+    #refs-card li::before { counter-increment: r; content: counter(r); position: absolute; left: 0; top: 1px; width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); border-radius: 5px; }
+    #refs-card em { font-style: italic; color: rgba(255,255,255,0.95); }
+    #refs-card a { color: #f0a883; }
+    #refs-close { position: absolute; top: 12px; right: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 18px; line-height: 1; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; }
+    #refs-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
     .tip { margin-top: 4px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11.5px; letter-spacing: 0; color: rgba(255,255,255,0.55); }
     /* value popup (click on the map) */
     .leaflet-popup-content-wrapper { background: rgba(10,12,20,0.93); color: #fff; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; box-shadow: 0 6px 22px rgba(0,0,0,0.5); }
@@ -161,6 +174,7 @@
     <div id="about">
       <p><b>What this shows:</b> Each map shows the fraction of plant available water in the top 50&nbsp;cm of soil across Kansas, at 1&nbsp;km resolution, updated daily. 0 is the wilting point (plants can no longer extract any water) and 1 is field capacity (a full profile). Each map is the soil water as of 6&nbsp;AM&nbsp;CST on its date.</p>
       <p><b>How it's made:</b> A daily soil water balance is driven by PRISM rainfall and a seasonal drying rate calibrated from the Kansas Mesonet, run on soil limits from USDA-SSURGO soil texture, and adjusted toward the same stations each day. Station markers (toggle above) show each station's reading on the same 0&ndash;1 scale.</p>
+      <p><a href="#" id="refs-link">Publications from the lab &rarr;</a></p>
     </div>
   </div>
 </div>
@@ -179,6 +193,20 @@
 
   <div class="chart-body"><canvas id="chart"></canvas></div>
   <div id="charts-note"></div>
+</div>
+
+<div id="refs-modal">
+  <div id="refs-card">
+    <button id="refs-close" title="Close">&times;</button>
+    <h3>References</h3>
+    <div class="refs-sub">Peer-reviewed work from the Soil Water Processes Lab underpinning this map.</div>
+    <ol>
+      <li>Patrignani, A., Knapp, M., Redmond, C., &amp; Santos, E. (2020). Technical overview of the Kansas Mesonet. <em>Journal of Atmospheric and Oceanic Technology</em>, 37(12), 2167&ndash;2183.</li>
+      <li>Parker, N., Kluitenberg, G. J., Redmond, C., &amp; Patrignani, A. (2022). A database of soil physical properties for the Kansas Mesonet. <em>Soil Science Society of America Journal</em>, 86(6), 1495&ndash;1508.</li>
+      <li>Peraza, J., Rossini, P. R., &amp; Patrignani, A. (2025). Mapping mesoscale soil moisture using a model-data fusion approach. <em>Journal of Hydrology</em>, 654, 132768.</li>
+      <li>Patrignani, A., Ochsner, T. E., Feng, L., Dyer, D., &amp; Rossini, P. R. (2022). Calibration and validation of soil water reflectometers. <em>Vadose Zone Journal</em>, 21(3), e20190.</li>
+    </ol>
+  </div>
 </div>
 
 <div id="loading"><div class="spinner"></div><span>Loading map…</span></div>
@@ -445,6 +473,13 @@ async function drawStations() {
 }
 stationToggle.addEventListener('change', drawStations);
 document.getElementById('about-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('about-open');
+
+// references modal
+const refsModal = document.getElementById('refs-modal');
+document.getElementById('refs-link').onclick = e => { e.preventDefault(); refsModal.classList.add('open'); };
+document.getElementById('refs-close').onclick = () => refsModal.classList.remove('open');
+refsModal.onclick = e => { if (e.target === refsModal) refsModal.classList.remove('open'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') refsModal.classList.remove('open'); });
 
 // ── colorbar (follows the map mode: FAW in value mode, RdBu change in delta modes) ──
 function drawColorbar() {
