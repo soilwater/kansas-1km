@@ -487,7 +487,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') refsModal.cl
 function drawColorbar() {
   const c = document.getElementById('colorbar-canvas'), g = c.getContext('2d'), diff = mode !== 'value';
   for (let x = 0; x < c.width; x++) { const ci = Math.round(x / (c.width - 1) * 255); g.fillStyle = diff ? drgb(ci) : rgb(ci); g.fillRect(x, 0, 1, c.height); }
-  document.querySelector('#colorbar .label').textContent = diff ? 'Change in available water (blue = wetter)' : 'Fraction of available water';
+  document.querySelector('#colorbar .label').textContent = diff ? 'Change in available water' : 'Fraction of available water';
   const labels = diff ? ['−0.3', '−0.15', '0', '+0.15', '+0.3'] : ['0', '0.2', '0.4', '0.6', '0.8', '1'];
   document.getElementById('colorbar-labels').innerHTML = labels.map(s => `<span>${s}</span>`).join('');
 }
