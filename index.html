@@ -222,17 +222,17 @@ const BOUNDS       = [[36.99262, -102.05760], [40.01096, -94.58362]];   // [[sou
 const SUMMARY_URL  = 'summary.csv';                            // date, faw_map, storage_km3, faw_stations, n_stations
 const COUNTIES_URL = 'boundaries/kansas_county_bnd.geojson';
 const MIN_DATE = new Date('2017-10-15T12:00:00');
-const STORAGE_FLOOR_KM3 = 17.0, STORAGE_CEILING_KM3 = 39.6;   // state totals at wilting point / field capacity (printed by analysis.ipynb, Figure 7)
+const PAW_BASE_KM3 = 15.113, PAW_CAPACITY_KM3 = 25.228;       // ΣLL·area (below-wilting base subtracted from storage_km3) / ΣTAW·area (plant-available water at field capacity)
 const MIN_STATIONS = 30;                                       // station mean is shown only when at least this many stations report
 
 // Variables offered in the chart. Each reads columns of summary.csv; add a row here to add a variable.
 const VARIABLES = {
-  faw: { label: 'Available water', y: 'FAW', min: 0, max: 1, fmt: v => v.toFixed(2),
+  faw: { label: 'Fraction (FAW)', y: 'FAW', min: 0, max: 1, fmt: v => v.toFixed(2),
          line: { col: 'faw_map', name: 'map, spatial mean' }, dots: { col: 'faw_stations', name: 'stations, mean' },
          note: 'Line: spatial mean of the map. Dots: mean of the Kansas Mesonet stations, shown when at least ' + MIN_STATIONS + ' report (fewer in freezing spells).' },
-  km3: { label: 'Water stored', y: 'km³', min: STORAGE_FLOOR_KM3, max: STORAGE_CEILING_KM3, fmt: v => v.toFixed(1) + ' km³',
-         line: { col: 'storage_km3', name: 'water stored in the top 50 cm' }, ref: { value: STORAGE_CEILING_KM3, name: 'field capacity' },
-         note: 'Axis floor: state total with every pixel at wilting point. Dashed: state total at field capacity.' },
+  km3: { label: 'Plant available water', y: 'km³', min: 0, max: PAW_CAPACITY_KM3, fmt: v => v.toFixed(1) + ' km³', fillArea: true,
+         line: { col: 'paw_km3', name: 'plant available water stored' }, ref: { value: PAW_CAPACITY_KM3, name: 'field capacity' },
+         note: 'Plant available water stored across the state (top 50 cm). Dashed: the amount at field capacity (' + PAW_CAPACITY_KM3.toFixed(0) + ' km³).' },
   n:   { label: 'Stations', y: 'stations', min: 0, max: 100, fmt: v => v.toFixed(0),
          line: { col: 'n_stations', name: 'stations reporting' }, note: 'Number of Mesonet stations with a valid, unfrozen profile that day.' },
 };
@@ -510,6 +510,7 @@ fetch(SUMMARY_URL).then(r => r.text()).then(txt => {
   S = { dates: rows.map(r => r[0]), index: {} };
   head.slice(1).forEach(name => S[name] = col(name));
   S.faw_stations = S.faw_stations.map((v, i) => S.n_stations[i] >= MIN_STATIONS ? v : null);
+  S.paw_km3 = S.storage_km3.map(v => v == null ? null : v - PAW_BASE_KM3);   // plant available water = total storage minus the constant below-wilting base
   S.dates.forEach((d, i) => S.index[d] = i);
   latest = fromISO(S.dates[S.dates.length - 1]); dateInput.max = S.dates[S.dates.length - 1];     // the last day that has a map
   buildButtons(); buildChart();
@@ -528,7 +529,7 @@ function buildButtons() {
 function buildChart() {
   const v = VARIABLES[variable], datasets = [];
   if (v.dots) datasets.push({ label: v.dots.name, data: S[v.dots.col], type: 'scatter', pointRadius: 1.3, pointHoverRadius: 3, backgroundColor: 'rgba(255,255,255,0.65)', order: 1 });
-  datasets.push({ label: v.line.name, data: S[v.line.col], borderColor: '#f0885a', borderWidth: 1.3, pointRadius: 0, pointHoverRadius: 3, fill: v.min === STORAGE_FLOOR_KM3 ? { target: 'start', above: 'rgba(240,136,90,0.12)' } : false, spanGaps: false, order: 2 });
+  datasets.push({ label: v.line.name, data: S[v.line.col], borderColor: '#f0885a', borderWidth: 1.3, pointRadius: 0, pointHoverRadius: 3, fill: v.fillArea ? { target: 'start', above: 'rgba(240,136,90,0.12)' } : false, spanGaps: false, order: 2 });
   if (v.ref) datasets.push({ label: v.ref.name, data: S.dates.map(() => v.ref.value), borderColor: 'rgba(255,255,255,0.4)', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, pointHoverRadius: 0, order: 3 });
   document.getElementById('charts-note').textContent = v.note;
   if (chart) chart.destroy();
