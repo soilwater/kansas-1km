@@ -42,8 +42,9 @@
     .sb-collapsible { display: flex; flex-direction: column; gap: 12px; }
     .sb-section { display: flex; flex-direction: column; gap: 6px; }
     #sidebar.collapsed .sb-collapsible { display: none; }
-    #about-toggle { margin-top: 10px; align-self: flex-start; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.78); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); border-radius: 7px; padding: 5px 11px; white-space: nowrap; transition: background .13s, color .13s, border-color .13s; }
-    #about-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    #about-toggle, #download-map { align-self: flex-start; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.78); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); border-radius: 7px; padding: 5px 11px; white-space: nowrap; transition: background .13s, color .13s, border-color .13s; }
+    #sidebar-actions { display: flex; gap: 6px; margin-top: 10px; }
+    #about-toggle:hover, #download-map:hover { background: rgba(255,255,255,0.12); color: #fff; }
     #title.open #about-toggle { background: rgba(240,136,90,0.18); border-color: rgba(240,136,90,0.55); color: #fff; }
     #about a { color: #f0a883; }
     /* references modal */
@@ -170,7 +171,10 @@
 
     <label id="station-row"><input type="checkbox" id="station-toggle"> Show Mesonet stations</label>
 
-    <button id="about-toggle" title="What this is and how it's made">About &amp; methods</button>
+    <div id="sidebar-actions">
+      <button id="download-map" title="Download map image currently on screen">Download</button>
+      <button id="about-toggle" title="What this is and how it's made">About</button>
+    </div>
     <div id="about">
       <p><b>PAW:</b> Plant available water, it represents the amount of water available to plants in the root zone, often expressed in mm, inches, km³, or acre-feet.</p>
       <p><b>FAW:</b> Fraction of plant available water, often expressed as a value between 0 and 1.</p>
@@ -475,6 +479,16 @@ async function drawStations() {
 }
 stationToggle.addEventListener('change', drawStations);
 document.getElementById('about-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('about-open');
+
+// download the image currently on the overlay (value PNG, or the generated change image), dated
+document.getElementById('download-map').onclick = () => {
+  const img = overlay && overlay.getElement(), src = img && img.src;
+  if (!src) { showError('No map to download yet'); return; }
+  const name = (mode === 'value' ? `kansas_faw_${toISO(currentDate)}`
+                                 : `kansas_faw_change_${lastDiff ? lastDiff.lag : lag}d_${toISO(currentDate)}`) + '.png';
+  const a = document.createElement('a'); a.href = src; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+};
 
 // references modal
 const refsModal = document.getElementById('refs-modal');
