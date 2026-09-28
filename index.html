@@ -103,18 +103,18 @@
 
     /* statewide time series: full-width bottom panel */
     #charts { bottom: 18px; left: 18px; right: 18px; padding: 10px 14px 8px; }
-    #charts.collapsed .chart-body { display: none; }
+    #charts.collapsed .chart-body, #charts.collapsed .tip, #charts.collapsed #charts-note { display: none; }   /* collapsed = header row only */
     #charts-head { display: flex; align-items: center; gap: 12px; user-select: none; }
     #charts-head .label { color: rgba(255,255,255,0.60); }
     #charts-head .btn { height: 26px; }
     #var-buttons { display: flex; gap: 4px; }
     #mode-buttons { display: flex; gap: 4px; }
     #charts-value { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.90); }
-    #charts-toggle { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.40); padding: 0 4px; }
+    #charts-toggle { min-width: 84px; }
     .chart-body { position: relative; height: 190px; margin-top: 6px; }
     #chart { width: 100%; height: 100%; }
     #charts-note { margin-top: 4px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11.5px; letter-spacing: 0; color: rgba(255,255,255,0.55); }
-    .leaflet-bottom { bottom: 260px; }                 /* keep Leaflet attribution above the chart panel */
+    .leaflet-bottom { bottom: 70px; }                  /* keep Leaflet attribution above the chart panel (starts collapsed) */
 
     #status { position: absolute; z-index: 1002; top: 66px; left: 50%; transform: translateX(-50%); padding: 7px 16px; border-radius: 9px; background: rgba(190,50,50,0.85); font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: #fff; display: none; white-space: nowrap; }
     #loading { position: absolute; z-index: 1002; top: 50%; left: 50%; transform: translate(-50%,-50%); padding: 14px 22px; border-radius: 13px; background: rgba(10,12,20,0.90); border: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; letter-spacing: 0.10em; color: rgba(255,255,255,0.55); display: none; align-items: center; gap: 11px; }
@@ -188,12 +188,12 @@
 <div id="status"></div>
 
 <!-- Statewide time series. Hover for values, click to jump the map to that day. -->
-<div class="panel" id="charts">
+<div class="panel collapsed" id="charts">
   <div id="charts-head">
     <span class="label">Statewide</span>
     <div id="var-buttons"></div>
     <span id="charts-value"></span>
-    <span id="charts-toggle" title="Collapse">−</span>
+    <button class="btn btn-label" id="charts-toggle" title="Show or hide the statewide chart">Expand</button>
   </div>
   <div class="tip">Tip: click anywhere on the timeline below to load the map for the corresponding date.</div>
 
@@ -275,7 +275,7 @@ const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); r
 const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return clamp(x); };
 
 // ── map ────────────────────────────────────────────────────────────────────
-const map = L.map('map', { center: [38.5, -98.35], zoom: 7, minZoom: 5, maxZoom: 12 });
+const map = L.map('map', { center: [38.5, -99.1], zoom: 7, minZoom: 5, maxZoom: 12 });   // centred a little west of Kansas so the west clears the sidebar
 map.zoomControl.setPosition('topright');                            // top-left is the sidebar
 map.createPane('rasterPane').style.zIndex = 350; map.createPane('countiesPane').style.zIndex = 420;
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 }).addTo(map);
@@ -537,7 +537,7 @@ function buildButtons() {
   const box = document.getElementById('var-buttons');
   for (const [key, v] of Object.entries(VARIABLES)) {
     const b = document.createElement('button'); b.className = 'btn btn-label' + (key === variable ? ' active' : ''); b.textContent = v.label; b.dataset.key = key;
-    b.onclick = () => { variable = key; [...box.children].forEach(x => x.classList.toggle('active', x.dataset.key === key)); buildChart(); };
+    b.onclick = () => { variable = key; [...box.children].forEach(x => x.classList.toggle('active', x.dataset.key === key)); setChartsCollapsed(false); buildChart(); };
     box.appendChild(b);
   }
 }
@@ -579,7 +579,7 @@ function updateMarker() {
 
 function setChartsCollapsed(c) {
   document.getElementById('charts').classList.toggle('collapsed', c);
-  document.getElementById('charts-toggle').textContent = c ? '+' : '−';
+  document.getElementById('charts-toggle').textContent = c ? 'Expand' : 'Collapse';
   const lb = document.querySelector('.leaflet-bottom'); if (lb) lb.style.bottom = c ? '70px' : '260px';
 }
 document.getElementById('charts-toggle').onclick = () => setChartsCollapsed(!document.getElementById('charts').classList.contains('collapsed'));
@@ -588,7 +588,7 @@ document.getElementById('charts-toggle').onclick = () => setChartsCollapsed(!doc
 const sidebarEl = document.getElementById('sidebar'), sidebarToggle = document.getElementById('sidebar-toggle');
 sidebarToggle.onclick = () => { sidebarToggle.innerHTML = sidebarEl.classList.toggle('collapsed') ? '&#8250;' : '&#8249;'; };
 // Small screens: tuck the chrome away so the map owns the view (the date arrows stay visible).
-if (window.innerWidth < 760) { sidebarEl.classList.add('collapsed'); sidebarToggle.innerHTML = '&#8250;'; setChartsCollapsed(true); }
+if (window.innerWidth < 760) { sidebarEl.classList.add('collapsed'); sidebarToggle.innerHTML = '&#8250;'; }   // the chart panel always starts collapsed (see HTML)
 
 </script>
 </body>
