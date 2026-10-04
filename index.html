@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL15BB37L1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DL15BB37L1');
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kansas Soil Water</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0c0e13; }
+    #map { position: absolute; inset: 0; }
+
+    .panel {
+      position: absolute; z-index: 1000;
+      background: rgba(10, 12, 20, 0.80);
+      backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 13px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+    }
+    .label { font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.40); }
+    .mono  { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.35); }
+
+    #sidebar { top: 18px; left: 18px; width: 260px; padding: 12px 14px; user-select: none; display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 300px); overflow-y: auto; }
+    #sidebar-head { display: flex; align-items: flex-start; gap: 10px; }
+    #sidebar-toggle { margin-left: auto; flex: none; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 15px; line-height: 1; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 7px; transition: background .13s, color .13s; }
+    #sidebar-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    #date-controls { display: flex; flex-direction: column; gap: 6px; }
+    #date-arrows { display: flex; gap: 3px; }
+    #date-arrows .btn { flex: 1; padding: 0 4px; }
+    #date-row2 { display: flex; gap: 6px; }
+    .sb-collapsible { display: flex; flex-direction: column; gap: 12px; }
+    .sb-section { display: flex; flex-direction: column; gap: 6px; }
+    #sidebar.collapsed .sb-collapsible { display: none; }
+    #about-toggle, #download-map, #learn-toggle { align-self: flex-start; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.78); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); border-radius: 7px; padding: 5px 9px; white-space: nowrap; transition: background .13s, color .13s, border-color .13s; }
+    #sidebar-actions { display: flex; gap: 6px; margin-top: 10px; }
+    #about-toggle:hover, #download-map:hover, #learn-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    #title.open #about-toggle { background: rgba(240,136,90,0.18); border-color: rgba(240,136,90,0.55); color: #fff; }
+    #about a { color: #f0a883; }
+    /* references modal */
+    #refs-modal { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+    #refs-modal.open { display: flex; }
+    #refs-card { position: relative; width: 100%; max-width: 640px; max-height: 82vh; overflow-y: auto; padding: 22px 26px; background: rgba(14,17,26,0.98); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; box-shadow: 0 16px 52px rgba(0,0,0,0.6); }
+    #refs-card h3 { font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+    #refs-card .refs-sub { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: rgba(255,255,255,0.5); margin: 4px 0 16px; }
+    #refs-card ol { list-style: none; counter-reset: r; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+    #refs-card li { position: relative; padding-left: 28px; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.82); }
+    #refs-card li::before { counter-increment: r; content: counter(r); position: absolute; left: 0; top: 1px; width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); border-radius: 5px; }
+    #refs-card em { font-style: italic; color: rgba(255,255,255,0.95); }
+    #refs-card a { color: #f0a883; }
+    #refs-close, #learn-close { position: absolute; top: 12px; right: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 18px; line-height: 1; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; }
+    #refs-close:hover, #learn-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    /* infographic modal (Learn): the PAW explainer in metric or imperial units, with its PDF */
+    #learn-modal { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+    #learn-modal.open { display: flex; }
+    #learn-card { width: 100%; max-width: 1100px; height: 90vh; display: flex; flex-direction: column; background: rgba(14,17,26,0.98); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; box-shadow: 0 16px 52px rgba(0,0,0,0.6); overflow: hidden; }
+    #learn-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    #learn-head h3 { margin-right: auto; font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+    #learn-head .btn { height: 28px; text-decoration: none; }
+    #unit-buttons { display: flex; gap: 4px; }
+    #learn-close { position: static; }
+    #learn-frame { flex: 1; width: 100%; border: 0; background: #faf9f5; }
+    .tip { margin-top: 4px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11.5px; letter-spacing: 0; color: rgba(255,255,255,0.55); }
+    /* value popup (click on the map) */
+    .leaflet-popup-content-wrapper { background: rgba(10,12,20,0.93); color: #fff; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; box-shadow: 0 6px 22px rgba(0,0,0,0.5); }
+    .leaflet-popup-content { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; margin: 9px 12px; }
+    .leaflet-popup-content .card { display: grid; grid-template-columns: auto auto; gap: 3px 12px; align-items: baseline; }
+    .leaflet-popup-content .card .k { color: rgba(255,255,255,0.5); font-size: 11px; letter-spacing: 0.03em; text-transform: uppercase; }
+    .leaflet-popup-content .card .v { color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .leaflet-popup-tip { background: rgba(10,12,20,0.93); }
+    .leaflet-popup-close-button { color: rgba(255,255,255,0.5) !important; }
+    .leaflet-container a.leaflet-popup-close-button:hover { color: #fff !important; }
+    #about { display: none; margin-top: 9px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.75); max-height: calc(100vh - 340px); overflow-y: auto; }
+    #about b { font-weight: 500; color: rgba(255,255,255,0.9); }
+    #about p + p { margin-top: 6px; }
+    #sidebar.about-open #about { display: block; }
+    #station-row { margin-top: 9px; display: flex; align-items: center; gap: 8px; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer; }
+    #station-row input { accent-color: #f0885a; }
+    .leaflet-tooltip { background: rgba(10,12,20,0.92); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.12); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .leaflet-tooltip-top:before { border-top-color: rgba(10,12,20,0.92); }
+    #title-main { font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,0.85); }
+    #title-sub  { margin-top: 3px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11px; letter-spacing: 0.02em; color: rgba(255,255,255,0.45); }
+
+    /* date/mode/colorbar/stations/about now live inside #sidebar */
+    .btn {
+      display: flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px;
+      font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 16px; line-height: 1;
+      color: rgba(255,255,255,0.55); cursor: pointer; user-select: none; white-space: nowrap; transition: background .13s, color .13s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.11); color: rgba(255,255,255,0.90); }
+    .btn-label { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 12px; }
+    .btn.active { background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.22); }
+    .sep { width: 1px; height: 20px; background: rgba(255,255,255,0.09); margin: 0 3px; }
+    #date-input {
+      flex: 1; height: 32px; min-width: 0; padding: 0 10px; outline: none; cursor: pointer; color-scheme: dark;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; background: rgba(255,255,255,0.06);
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.88);
+    }
+
+    #colorbar-canvas { display: block; width: 100%; height: 11px; border-radius: 5px; }
+    #colorbar-labels { width: 100%; display: flex; justify-content: space-between; }
+
+    /* statewide time series: full-width bottom panel */
+    #charts { bottom: 18px; left: 18px; right: 18px; padding: 10px 14px 8px; }
+    #charts.collapsed .chart-body, #charts.collapsed .tip, #charts.collapsed #charts-note { display: none; }   /* collapsed = header row only */
+    #charts-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; user-select: none; }   /* wraps on phones instead of widening the page */
+    #charts-head .label { color: rgba(255,255,255,0.60); }
+    #charts-head .btn { height: 26px; }
+    #var-buttons { display: flex; gap: 4px; }
+    #mode-buttons { display: flex; gap: 4px; }
+    #charts-value { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.90); }
+    #charts-toggle { min-width: 84px; }
+    .chart-body { position: relative; height: 190px; margin-top: 6px; }
+    #chart { width: 100%; height: 100%; }
+    #charts-note { margin-top: 4px; font-family: 'Inter', system-ui, sans-serif; font-weight: 400; font-size: 11.5px; letter-spacing: 0; color: rgba(255,255,255,0.55); }
+    .leaflet-bottom { bottom: 70px; }                  /* keep Leaflet attribution above the chart panel (starts collapsed) */
+
+    #status { position: absolute; z-index: 1002; top: 66px; left: 50%; transform: translateX(-50%); padding: 7px 16px; border-radius: 9px; background: rgba(190,50,50,0.85); font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: #fff; display: none; white-space: nowrap; }
+    #loading { position: absolute; z-index: 1002; top: 50%; left: 50%; transform: translate(-50%,-50%); padding: 14px 22px; border-radius: 13px; background: rgba(10,12,20,0.90); border: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; letter-spacing: 0.10em; color: rgba(255,255,255,0.55); display: none; align-items: center; gap: 11px; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.10); border-top-color: rgba(255,255,255,0.60); border-radius: 50%; animation: spin .65s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .leaflet-image-layer { transition: opacity .30s ease; image-rendering: pixelated; }   /* show the true 1-km pixels, no smoothing */
+    .leaflet-tile-pane { filter: grayscale(1) invert(1) brightness(0.55) contrast(1.1); }   /* dark basemap from standard OSM tiles */
+    .leaflet-control-attribution { background: rgba(0,0,0,0.50) !important; color: rgba(255,255,255,0.30) !important; font-size: 9px !important; }
+    .leaflet-control-attribution a { color: rgba(255,255,255,0.40) !important; }
+    .leaflet-control-zoom { border: 1px solid rgba(255,255,255,0.10) !important; border-radius: 11px !important; overflow: hidden; }
+    .leaflet-control-zoom a { background: rgba(10,12,20,0.88) !important; color: rgba(255,255,255,0.60) !important; border-color: rgba(255,255,255,0.08) !important; width: 30px !important; height: 30px !important; line-height: 30px !important; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="panel" id="sidebar">
+  <div id="sidebar-head">
+    <div>
+      <div id="title-main">Kansas Soil Water</div>
+      <div id="title-sub">Fraction of available water</div>
+      <div id="title-sub">Top 60 cm (2 ft) &nbsp; | &nbsp; 1-km &nbsp; | &nbsp; Daily</div>
+    </div>
+    <button id="sidebar-toggle" title="Collapse panel">&#8249;</button>
+  </div>
+
+  <div id="date-controls">
+    <div id="date-arrows">
+      <button class="btn" id="btn-mo-prev"  title="Back 1 month">«</button>
+      <button class="btn" id="btn-wk-prev"  title="Back 1 week (↓)">‹‹</button>
+      <button class="btn" id="btn-day-prev" title="Back 1 day (←)">‹</button>
+      <button class="btn" id="btn-day-next" title="Forward 1 day (→)">›</button>
+      <button class="btn" id="btn-wk-next"  title="Forward 1 week (↑)">››</button>
+      <button class="btn" id="btn-mo-next"  title="Forward 1 month">»</button>
+    </div>
+    <div id="date-row2">
+      <input type="date" id="date-input" autocomplete="off"/>
+      <button class="btn btn-label" id="btn-latest" title="Jump to the latest map">Latest</button>
+    </div>
+  </div>
+
+  <div class="sb-collapsible">
+    <div class="sb-section">
+      <div class="label">Map</div>
+      <div id="mode-buttons" title="Show the value, or the change over a fixed number of days"></div>
+    </div>
+
+    <div class="sb-section" id="colorbar">
+      <div class="label">Fraction of available water</div>
+      <canvas id="colorbar-canvas" width="220" height="11"></canvas>
+      <div id="colorbar-labels" class="mono"><span>0</span><span>0.2</span><span>0.4</span><span>0.6</span><span>0.8</span><span>1</span></div>
+    </div>
+
+    <label id="station-row"><input type="checkbox" id="station-toggle"> Show Mesonet stations</label>
+
+    <div id="sidebar-actions">
+      <button id="download-map" title="Download map image currently on screen">Download</button>
+      <button id="about-toggle" title="What this is and how it's made">About</button>
+      <button id="learn-toggle" title="What plant available water means: infographic and PDF">Learn</button>
+    </div>
+    <div id="about">
+      <p><b>PAW:</b> Plant available water, it represents the amount of water available to plants in the root zone, often expressed in mm, inches, km³, or acre-feet.</p>
+      <p><b>FAW:</b> Fraction of plant available water, often expressed as a value between 0 and 1.</p>
+      <p><b>What the map shows:</b> Each map shows the fraction of plant available water in the top 60&nbsp;cm (2&nbsp;ft) of soil across Kansas, at 1&nbsp;km resolution, updated daily. 0 is the wilting point (plants can no longer extract any water) and 1 is field capacity (a full profile). Each map represents the soil moisture conditions as of 6&nbsp;AM&nbsp;CST on its date.</p>
+      <p><b>How it's made:</b> A daily soil water balance is driven by PRISM rainfall and a seasonal drying rate calibrated from the Kansas Mesonet, run on soil limits from USDA-SSURGO soil texture, and adjusted toward the same stations each day. Station markers (toggle above) show each station's reading on the same 0&ndash;1 scale.</p>
+      <p><a href="#" id="refs-link">Publications from the lab &rarr;</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="status"></div>
+
+<!-- Statewide time series. Hover for values, click to jump the map to that day. -->
+<div class="panel collapsed" id="charts">
+  <div id="charts-head">
+    <span class="label">Statewide</span>
+    <div id="var-buttons"></div>
+    <span id="charts-value"></span>
+    <button class="btn btn-label" id="charts-toggle" title="Show or hide the statewide chart">Expand</button>
+  </div>
+  <div class="tip">Tip: click anywhere on the timeline below to load the map for the corresponding date.</div>
+
+  <div class="chart-body"><canvas id="chart"></canvas></div>
+  <div id="charts-note"></div>
+</div>
+
+<div id="refs-modal">
+  <div id="refs-card">
+    <button id="refs-close" title="Close">&times;</button>
+    <h3>References</h3>
+    <div class="refs-sub">Peer-reviewed work from the Soil Water Processes Lab underpinning this map.</div>
+    <ol>
+      <li>Patrignani, A., Knapp, M., Redmond, C., &amp; Santos, E. (2020). Technical overview of the Kansas Mesonet. <em>Journal of Atmospheric and Oceanic Technology</em>, 37(12), 2167&ndash;2183.</li>
+      <li>Parker, N., Kluitenberg, G. J., Redmond, C., &amp; Patrignani, A. (2022). A database of soil physical properties for the Kansas Mesonet. <em>Soil Science Society of America Journal</em>, 86(6), 1495&ndash;1508.</li>
+      <li>Peraza, J., Rossini, P. R., &amp; Patrignani, A. (2025). Mapping mesoscale soil moisture using a model-data fusion approach. <em>Journal of Hydrology</em>, 654, 132768.</li>
+      <li>Patrignani, A., Ochsner, T. E., Feng, L., Dyer, D., &amp; Rossini, P. R. (2022). Calibration and validation of soil water reflectometers. <em>Vadose Zone Journal</em>, 21(3), e20190.</li>
+    </ol>
+  </div>
+</div>
+
+<div id="learn-modal">
+  <div id="learn-card">
+    <div id="learn-head">
+      <h3>Plant available water explained</h3>
+      <div id="unit-buttons">
+        <button class="btn btn-label" data-unit="imperial">Imperial</button>
+        <button class="btn btn-label" data-unit="metric">Metric</button>
+      </div>
+      <a class="btn btn-label" id="learn-pdf" download>Download PDF</a>
+      <button id="learn-close" title="Close">&times;</button>
+    </div>
+    <iframe id="learn-frame" title="Plant available water infographic"></iframe>
+  </div>
+</div>
+
+<div id="loading"><div class="spinner"></div><span>Loading map…</span></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+
+// ── configuration ──────────────────────────────────────────────────────────
+const MAPS_PATH    = 'png/';                                   // faw_YYYYMMDD.png, written by the operational notebook (write_png)
+const BOUNDS       = [[36.99262, -102.05760], [40.01096, -94.58362]];   // [[south, west], [north, east]] of the model grid (mask.tif)
+const SUMMARY_URL  = 'summary.csv';                            // date, faw_map, storage_km3, faw_stations, n_stations
+const COUNTIES_URL = 'boundaries/kansas_county_bnd.geojson';
+const MIN_DATE = new Date('2017-10-15T12:00:00');
+const PAW_BASE_KM3 = 18.479, PAW_CAPACITY_KM3 = 30.049;       // ΣLL·area (below-wilting base subtracted from storage_km3) / ΣTAW·area (plant-available water at field capacity)
+const MIN_STATIONS = 30;                                       // station mean is shown only when at least this many stations report
+
+// Variables offered in the chart. Each reads columns of summary.csv; add a row here to add a variable.
+const VARIABLES = {
+  faw: { label: 'FAW', y: 'FAW', min: 0, max: 1, fmt: v => v.toFixed(2),
+         line: { col: 'faw_map', name: 'map, spatial mean' }, dots: { col: 'faw_stations', name: 'stations, mean' },
+         note: 'Line: spatial mean of the map. Dots: mean of the Kansas Mesonet stations, shown when at least ' + MIN_STATIONS + ' report (fewer in freezing spells).' },
+  km3: { label: 'PAW', y: 'km³', min: 0, max: PAW_CAPACITY_KM3, fmt: v => v.toFixed(1) + ' km³', fillArea: true,
+         line: { col: 'paw_km3', name: 'plant available water stored' }, ref: { value: PAW_CAPACITY_KM3, name: 'field capacity' },
+         note: 'Plant available water stored across the state (top 60 cm, 2 ft). Dashed: the amount at field capacity (' + PAW_CAPACITY_KM3.toFixed(0) + ' km³).' },
+  n:   { label: 'Stations', y: 'stations', min: 0, max: 100, fmt: v => v.toFixed(0),
+         line: { col: 'n_stations', name: 'stations reporting' }, note: 'Number of Mesonet stations with a valid, unfrozen profile that day.' },
+};
+
+// ── Spectral colormap, 0..1 ────────────────────────────────────────────────
+const STOPS = [[0,[158,1,66]],[25,[213,62,79]],[51,[244,109,67]],[76,[253,174,97]],[102,[254,224,139]],[128,[255,255,191]],
+               [153,[230,245,152]],[178,[171,221,164]],[204,[102,194,165]],[229,[50,136,189]],[255,[94,79,162]]];
+const CMAP = new Uint8Array(256 * 3);
+for (let v = 0, s = 0; v <= 255; v++) {
+  while (s < STOPS.length - 2 && v > STOPS[s + 1][0]) s++;
+  const [v0, c0] = STOPS[s], [v1, c1] = STOPS[s + 1], t = (v - v0) / (v1 - v0);
+  for (let k = 0; k < 3; k++) CMAP[v * 3 + k] = (c0[k] + t * (c1[k] - c0[k])) | 0;
+}
+const rgb = ci => `rgb(${CMAP[ci*3]},${CMAP[ci*3+1]},${CMAP[ci*3+2]})`;
+
+// ── RdBu diverging colormap for the change maps (red = drier, blue = wetter) ──
+const DSTOPS = [[0,[103,0,31]],[26,[178,24,43]],[51,[214,96,77]],[77,[244,165,130]],[102,[253,219,199]],[128,[247,247,247]],
+                [153,[209,229,240]],[179,[146,197,222]],[204,[67,147,195]],[230,[33,102,172]],[255,[5,48,97]]];
+const DMAP = new Uint8Array(256 * 3);
+for (let v = 0, s = 0; v <= 255; v++) {
+  while (s < DSTOPS.length - 2 && v > DSTOPS[s + 1][0]) s++;
+  const [v0, c0] = DSTOPS[s], [v1, c1] = DSTOPS[s + 1], t = (v - v0) / (v1 - v0);
+  for (let k = 0; k < 3; k++) DMAP[v * 3 + k] = (c0[k] + t * (c1[k] - c0[k])) | 0;
+}
+const drgb = ci => `rgb(${DMAP[ci*3]},${DMAP[ci*3+1]},${DMAP[ci*3+2]})`;
+
+// ── dates ──────────────────────────────────────────────────────────────────
+const toISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fromISO = s => new Date(s + 'T12:00:00');
+function yesterday() { const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(12,0,0,0); return d; }
+let latest = yesterday();                                          // replaced by the last date in summary.csv once it loads
+const clamp = d => d < MIN_DATE ? new Date(MIN_DATE) : (d > latest ? new Date(latest) : d);
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return clamp(x); };
+const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return clamp(x); };
+
+// ── map ────────────────────────────────────────────────────────────────────
+const map = L.map('map', { center: [38.5, -99.1], zoom: 7, minZoom: 5, maxZoom: 12 });   // centred a little west of Kansas so the west clears the sidebar
+map.zoomControl.setPosition('topright');                            // top-left is the sidebar
+map.createPane('rasterPane').style.zIndex = 350; map.createPane('countiesPane').style.zIndex = 420;
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 }).addTo(map);
+let countiesGeo = null;                                             // kept for the point-in-polygon county lookup on click
+fetch(COUNTIES_URL).then(r => r.json()).then(g => { countiesGeo = g; L.geoJSON(g, { pane: 'countiesPane', style: { color: 'rgba(160,185,220,0.45)', weight: 0.9, fill: false } }).addTo(map); }).catch(() => {});
+
+// which county contains a point (ray casting; handles Polygon holes and MultiPolygon)
+function pointInRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function countyAt(lat, lng) {
+  if (!countiesGeo) return null;
+  for (const f of countiesGeo.features) {
+    const g = f.geometry; if (!g) continue;
+    const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
+    for (const poly of polys) {                                     // poly = [outerRing, ...holes]
+      if (!pointInRing(lng, lat, poly[0])) continue;
+      let inHole = false; for (let i = 1; i < poly.length; i++) if (pointInRing(lng, lat, poly[i])) { inHole = true; break; }
+      if (!inHole) return f.properties.NAME;
+    }
+  }
+  return null;
+}
+
+let overlay = null;
+const loadingEl = document.getElementById('loading'), statusEl = document.getElementById('status');
+let statusTimer;
+function showError(msg) { clearTimeout(statusTimer); statusEl.textContent = msg; statusEl.style.display = 'block'; statusTimer = setTimeout(() => statusEl.style.display = 'none', 4000); }
+
+function showOverlay(src) {                                        // src: a PNG url (value mode) or a canvas dataURL (change mode)
+  loadingEl.style.display = 'flex'; statusEl.style.display = 'none';
+  const next = L.imageOverlay(src, BOUNDS, { pane: 'rasterPane', opacity: 0, interactive: false });
+  next.on('load', () => { next.setOpacity(1); if (overlay) { const old = overlay; setTimeout(() => map.removeLayer(old), 320); } overlay = next; loadingEl.style.display = 'none'; });
+  next.on('error', () => { map.removeLayer(next); loadingEl.style.display = 'none'; showError(`No map for ${toISO(currentDate)}`); });
+  next.addTo(map);
+}
+function loadMap(date) { showOverlay(MAPS_PATH + `faw_${toISO(date).replace(/-/g, '')}.png`); }
+
+// ── map display mode: value, or change over a fixed number of days ────────────
+// Add a lag by adding one row here; the button and the colorbar follow automatically.
+let mode = 'value', lag = 0;
+const MODES = [
+  { key: 'value', label: 'Value',   lag: 0 },
+  { key: 'd7',    label: 'Δ 7-day', lag: 7 },
+  //{ key: 'd1', label: 'Δ 1-day', lag: 1 }, { key: 'd15', label: 'Δ 15-day', lag: 15 }, { key: 'd30', label: 'Δ 30-day', lag: 30 },
+];
+function buildModeButtons() {
+  const box = document.getElementById('mode-buttons');
+  MODES.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'btn btn-label' + (m.key === mode ? ' active' : ''); b.textContent = m.label; b.dataset.key = m.key;
+    b.onclick = () => { mode = m.key; lag = m.lag; [...box.children].forEach(x => x.classList.toggle('active', x.dataset.key === m.key)); drawColorbar(); render(); };
+    box.appendChild(b);
+  });
+}
+function render() {                                                 // draw the current day in the current mode
+  map.closePopup();                                                 // a value/change readout is tied to one day and mode
+  if (mode === 'value') { loadMap(currentDate); loadSampler(currentDate); }
+  else renderDiff(currentDate, lag);
+  drawStations();
+}
+
+// ── pixel sampling: invert the Spectral PNG back to FAW ───────────────────────
+// The map is a paletted Spectral PNG with no antialiasing. We draw it to an offscreen canvas at
+// native resolution and invert each pixel's colour to FAW via CMAP. This powers both click-to-read
+// (value mode) and the difference maps (delta modes) — no extra data files are published.
+const samp = { canvas: document.createElement('canvas'), ctx: null, w: 0, h: 0, ready: false, url: '' };
+samp.ctx = samp.canvas.getContext('2d', { willReadFrequently: true });
+function loadSampler(date) {
+  const url = MAPS_PATH + `faw_${toISO(date).replace(/-/g, '')}.png`;
+  samp.ready = false; samp.url = url;
+  const im = new Image(); im.crossOrigin = 'anonymous';
+  im.onload = () => { if (samp.url !== url) return; samp.w = im.naturalWidth; samp.h = im.naturalHeight;
+    samp.canvas.width = samp.w; samp.canvas.height = samp.h; samp.ctx.imageSmoothingEnabled = false;
+    samp.ctx.clearRect(0, 0, samp.w, samp.h); samp.ctx.drawImage(im, 0, 0); samp.ready = true; };
+  im.onerror = () => { if (samp.url === url) samp.ready = false; };
+  im.src = url;
+}
+function nearestFAW(r, g, b) {                                      // closest colormap index, returned as FAW 0..1
+  let bi = 0, bd = Infinity;
+  for (let i = 0; i < 256; i++) { const dr = r-CMAP[i*3], dg = g-CMAP[i*3+1], db = b-CMAP[i*3+2], d = dr*dr+dg*dg+db*db; if (d < bd) { bd = d; bi = i; } }
+  return bi / 255;
+}
+const _fawMemo = new Map();                                         // a PNG holds <=251 distinct colours; memoise the nearest-colour search
+function fawFromRGB(r, g, b) { const key = (r<<16)|(g<<8)|b; let v = _fawMemo.get(key); if (v === undefined) { v = nearestFAW(r, g, b); _fawMemo.set(key, v); } return v; }
+
+// FAW grid for a day (Float32; NaN outside Kansas), cached by date — the input to the difference maps.
+const gridCache = new Map();
+function getGrid(date) {
+  const iso = toISO(date);
+  if (gridCache.has(iso)) return Promise.resolve(gridCache.get(iso));
+  return new Promise(resolve => {
+    const im = new Image(); im.crossOrigin = 'anonymous';
+    im.onload = () => {
+      const w = im.naturalWidth, h = im.naturalHeight, cv = document.createElement('canvas');
+      cv.width = w; cv.height = h; const cx = cv.getContext('2d', { willReadFrequently: true });
+      cx.imageSmoothingEnabled = false; cx.drawImage(im, 0, 0); const d = cx.getImageData(0, 0, w, h).data;
+      const faw = new Float32Array(w * h);
+      for (let i = 0, p = 0; i < faw.length; i++, p += 4) faw[i] = d[p+3] === 0 ? NaN : fawFromRGB(d[p], d[p+1], d[p+2]);
+      const grid = { w, h, faw }; gridCache.set(iso, grid); resolve(grid);
+    };
+    im.onerror = () => { gridCache.set(iso, null); resolve(null); };
+    im.src = MAPS_PATH + `faw_${iso.replace(/-/g, '')}.png`;
+  });
+}
+
+// ── difference map (delta modes): today minus N days earlier, on an RdBu scale ─
+const DELTA_MAX = 0.3;                                              // colour scale saturates at +/- this change in FAW
+let lastDiff = null;                                                // {w,h,delta,lag} for click-to-read
+async function renderDiff(date, lag) {
+  loadingEl.style.display = 'flex'; statusEl.style.display = 'none';
+  const earlier = new Date(date); earlier.setDate(earlier.getDate() - lag);
+  const [g0, g1] = await Promise.all([getGrid(date), getGrid(earlier)]);
+  if (mode === 'value') return;                                     // switched back while loading
+  if (!g0 || !g1 || g0.w !== g1.w || g0.h !== g1.h) { loadingEl.style.display = 'none'; showError(`No ${lag}-day change for ${toISO(date)}`); return; }
+  const { w, h } = g0, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const cx = cv.getContext('2d'), img = cx.createImageData(w, h), delta = new Float32Array(w * h);
+  for (let i = 0, p = 0; i < w * h; i++, p += 4) {
+    const a = g0.faw[i], b = g1.faw[i];
+    if (Number.isNaN(a) || Number.isNaN(b)) { delta[i] = NaN; img.data[p+3] = 0; continue; }
+    const dd = a - b; delta[i] = dd;
+    const ci = Math.round((Math.max(-DELTA_MAX, Math.min(DELTA_MAX, dd)) + DELTA_MAX) / (2 * DELTA_MAX) * 255) * 3;
+    img.data[p] = DMAP[ci]; img.data[p+1] = DMAP[ci+1]; img.data[p+2] = DMAP[ci+2]; img.data[p+3] = 255;
+  }
+  cx.putImageData(img, 0, 0); lastDiff = { w, h, delta, lag };
+  showOverlay(cv.toDataURL());
+}
+
+// ── click to read the value (or the change) under the cursor ──────────────────
+function pixelAt(lat, lng, w, h) {
+  const south = BOUNDS[0][0], west = BOUNDS[0][1], north = BOUNDS[1][0], east = BOUNDS[1][1];
+  if (lat < south || lat > north || lng < west || lng > east) return null;
+  return [Math.min(w-1, Math.floor((lng-west)/(east-west)*w)), Math.min(h-1, Math.floor((north-lat)/(north-south)*h))];
+}
+map.on('click', e => {
+  const { lat, lng } = e.latlng;
+  const row = (k, v) => `<span class="k">${k}</span><span class="v">${v}</span>`;
+  let valLabel, valStr;
+  if (mode === 'value') {
+    if (!samp.ready) return;
+    const pt = pixelAt(lat, lng, samp.w, samp.h); if (!pt) return;
+    const d = samp.ctx.getImageData(pt[0], pt[1], 1, 1).data; if (d[3] === 0) return;
+    valLabel = 'FAW'; valStr = nearestFAW(d[0], d[1], d[2]).toFixed(2);
+  } else {
+    if (!lastDiff) return;
+    const pt = pixelAt(lat, lng, lastDiff.w, lastDiff.h); if (!pt) return;
+    const dd = lastDiff.delta[pt[1]*lastDiff.w + pt[0]]; if (Number.isNaN(dd)) return;
+    valLabel = `${lastDiff.lag}-day Δ`; valStr = `${dd >= 0 ? '+' : '−'}${Math.abs(dd).toFixed(2)}`;
+  }
+  const html = `<div class="card">${row('County', countyAt(lat, lng) || '—')}${row('Date', toISO(currentDate))}` +
+               `${row('Lat', lat.toFixed(3))}${row('Lon', lng.toFixed(3))}${row(valLabel, valStr)}</div>`;
+  L.popup({ closeButton: true, autoPan: false }).setLatLng(e.latlng).setContent(html).openOn(map);
+});
+
+// ── date controls ──────────────────────────────────────────────────────────
+const dateInput = document.getElementById('date-input');
+let currentDate = yesterday();
+dateInput.min = toISO(MIN_DATE); dateInput.max = toISO(yesterday());
+function setDate(d) { currentDate = d; dateInput.value = toISO(d); render(); updateMarker(); }
+const on = (id, fn) => document.getElementById(id).onclick = fn;
+on('btn-day-prev', () => setDate(addDays(currentDate, -1)));   on('btn-day-next', () => setDate(addDays(currentDate, 1)));
+on('btn-wk-prev',  () => setDate(addDays(currentDate, -7)));   on('btn-wk-next',  () => setDate(addDays(currentDate, 7)));
+on('btn-mo-prev',  () => setDate(addMonths(currentDate, -1))); on('btn-mo-next',  () => setDate(addMonths(currentDate, 1)));
+on('btn-latest',   () => setDate(new Date(latest)));
+dateInput.addEventListener('change', () => { if (dateInput.value) setDate(clamp(fromISO(dateInput.value))); });
+document.addEventListener('keydown', e => {
+  if (document.activeElement === dateInput) return;
+  const keys = { ArrowLeft: -1, ArrowRight: 1, ArrowDown: -7, ArrowUp: 7 };
+  if (e.key in keys) { e.preventDefault(); setDate(addDays(currentDate, keys[e.key])); }
+});
+
+// ── station markers (same colour scale as the map) ────────────────────────
+// residuals.csv (written by the operational notebook) holds, per station and day, the observed and modelled FAW at the station pixel.
+let stationData = null, stationMeta = null;
+const stationLayer = L.layerGroup().addTo(map), stationToggle = document.getElementById('station-toggle');
+map.createPane('stationPane').style.zIndex = 450;
+async function loadStations() {
+  if (stationData) return;
+  const [meta, res] = await Promise.all([fetch('ks_mesonet_stations.csv').then(r => r.text()), fetch('residuals.csv').then(r => r.text())]);
+  const mrows = meta.trim().split('\n').map(l => l.trim().split(',')), mh = mrows.shift();
+  stationMeta = Object.fromEntries(mrows.map(r => [r[mh.indexOf('STATION')], [parseFloat(r[mh.indexOf('LATITUDE')]), parseFloat(r[mh.indexOf('LONGITUDE')])]]));
+  stationData = {};
+  const rows = res.trim().split('\n'), h = rows.shift().trim().split(','), iD = h.indexOf('date'), iS = h.indexOf('STATION'), iO = h.indexOf('faw_obs'), iM = h.indexOf('faw_model');
+  for (const line of rows) { const r = line.trim().split(','); (stationData[r[iD]] ||= []).push([r[iS], parseFloat(r[iO]), parseFloat(r[iM])]); }
+}
+async function drawStations() {
+  stationLayer.clearLayers();
+  if (mode !== 'value' || !stationToggle.checked) return;          // markers are absolute values; hide them on change maps
+  await loadStations();
+  for (const [name, obs, mod] of stationData[toISO(currentDate)] || []) {
+    const ll = stationMeta[name]; if (!ll) continue;
+    const ci = Math.max(0, Math.min(255, Math.round(obs * 255)));
+    L.circleMarker(ll, { pane: 'stationPane', radius: 6, color: '#111', weight: 1.2, fillColor: rgb(ci), fillOpacity: 1 })
+      .bindTooltip(`<b>${name}</b><br>station ${obs.toFixed(2)} &nbsp;·&nbsp; map ${mod.toFixed(2)}`, { direction: 'top', offset: [0, -6] }).addTo(stationLayer);
+  }
+}
+stationToggle.addEventListener('change', drawStations);
+document.getElementById('about-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('about-open');
+
+// download the image currently on the overlay (value PNG, or the generated change image), dated
+document.getElementById('download-map').onclick = () => {
+  const img = overlay && overlay.getElement(), src = img && img.src;
+  if (!src) { showError('No map to download yet'); return; }
+  const name = (mode === 'value' ? `kansas_faw_${toISO(currentDate)}`
+                                 : `kansas_faw_change_${lastDiff ? lastDiff.lag : lag}d_${toISO(currentDate)}`) + '.png';
+  const a = document.createElement('a'); a.href = src; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+// references modal
+const refsModal = document.getElementById('refs-modal');
+document.getElementById('refs-link').onclick = e => { e.preventDefault(); refsModal.classList.add('open'); };
+document.getElementById('refs-close').onclick = () => refsModal.classList.remove('open');
+refsModal.onclick = e => { if (e.target === refsModal) refsModal.classList.remove('open'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { refsModal.classList.remove('open'); learnModal.classList.remove('open'); } });
+
+// infographic modal: loaded on first open (the pages are ~2 MB each); the chosen units are remembered per browser
+const INFOGRAPHICS = {
+  imperial: { html: 'infographics/Kansas PAW - Imperial.html', pdf: 'infographics/pawc_educational_imperial.pdf' },
+  metric:   { html: 'infographics/Kansas PAW - Metric.html',   pdf: 'infographics/pawc_educational_metric.pdf' },
+};
+const learnModal = document.getElementById('learn-modal'), learnFrame = document.getElementById('learn-frame'), learnPdf = document.getElementById('learn-pdf');
+let units = 'imperial';
+try { units = localStorage.getItem('kansas-paw-units') || units; } catch (e) {}
+function setUnits(u) {
+  units = INFOGRAPHICS[u] ? u : 'imperial';
+  learnFrame.src = encodeURI(INFOGRAPHICS[units].html);
+  learnPdf.href = encodeURI(INFOGRAPHICS[units].pdf);
+  learnPdf.download = `kansas_plant_available_water_${units}.pdf`;
+  document.querySelectorAll('#unit-buttons .btn').forEach(b => b.classList.toggle('active', b.dataset.unit === units));
+  try { localStorage.setItem('kansas-paw-units', units); } catch (e) {}
+}
+document.querySelectorAll('#unit-buttons .btn').forEach(b => b.onclick = () => setUnits(b.dataset.unit));
+document.getElementById('learn-toggle').onclick = () => { if (!learnFrame.getAttribute('src')) setUnits(units); learnModal.classList.add('open'); };
+document.getElementById('learn-close').onclick = () => learnModal.classList.remove('open');
+learnModal.onclick = e => { if (e.target === learnModal) learnModal.classList.remove('open'); };
+
+// ── colorbar (follows the map mode: FAW in value mode, RdBu change in delta modes) ──
+function drawColorbar() {
+  const c = document.getElementById('colorbar-canvas'), g = c.getContext('2d'), diff = mode !== 'value';
+  for (let x = 0; x < c.width; x++) { const ci = Math.round(x / (c.width - 1) * 255); g.fillStyle = diff ? drgb(ci) : rgb(ci); g.fillRect(x, 0, 1, c.height); }
+  document.querySelector('#colorbar .label').textContent = diff ? 'Change in available water' : 'Fraction of available water';
+  const labels = diff ? ['−0.3', '−0.15', '0', '+0.15', '+0.3'] : ['0', '0.2', '0.4', '0.6', '0.8', '1'];
+  document.getElementById('colorbar-labels').innerHTML = labels.map(s => `<span>${s}</span>`).join('');
+}
+buildModeButtons(); drawColorbar();
+
+// ── statewide chart (Chart.js) ─────────────────────────────────────────────
+// summary.csv is written by the operational notebook (one row per day) and rebuilt by analysis.ipynb (Figure 6).
+let S = null, chart = null, variable = 'faw';
+const markerPlugin = {                                             // vertical line at the selected day
+  id: 'marker',
+  afterDraw(c) {
+    if (!S) return;
+    const i = S.index[toISO(currentDate)]; if (i === undefined) return;
+    const x = c.scales.x.getPixelForValue(i), { top, bottom } = c.chartArea, g = c.ctx;
+    g.save(); g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, top); g.lineTo(x, bottom); g.stroke(); g.restore();
+  },
+};
+
+fetch(SUMMARY_URL).then(r => r.text()).then(txt => {
+  const rows = txt.trim().split('\n').map(l => l.trim().split(',')), head = rows.shift();
+  const col = name => rows.map(r => { const v = parseFloat(r[head.indexOf(name)]); return isFinite(v) ? v : null; });
+  S = { dates: rows.map(r => r[0]), index: {} };
+  head.slice(1).forEach(name => S[name] = col(name));
+  S.faw_stations = S.faw_stations.map((v, i) => S.n_stations[i] >= MIN_STATIONS ? v : null);
+  S.paw_km3 = S.storage_km3.map(v => v == null ? null : v - PAW_BASE_KM3);   // plant available water = total storage minus the constant below-wilting base
+  S.dates.forEach((d, i) => S.index[d] = i);
+  latest = fromISO(S.dates[S.dates.length - 1]); dateInput.max = S.dates[S.dates.length - 1];     // the last day that has a map
+  buildButtons(); buildChart();
+  setDate(new Date(latest));                                                                   // boot on the last day that has a map
+}).catch(() => { document.getElementById('charts').style.display = 'none'; setDate(yesterday()); });
+
+function buildButtons() {
+  const box = document.getElementById('var-buttons');
+  for (const [key, v] of Object.entries(VARIABLES)) {
+    const b = document.createElement('button'); b.className = 'btn btn-label' + (key === variable ? ' active' : ''); b.textContent = v.label; b.dataset.key = key;
+    b.onclick = () => { variable = key; [...box.children].forEach(x => x.classList.toggle('active', x.dataset.key === key)); setChartsCollapsed(false); buildChart(); };
+    box.appendChild(b);
+  }
+}
+
+function buildChart() {
+  const v = VARIABLES[variable], datasets = [];
+  if (v.dots) datasets.push({ label: v.dots.name, data: S[v.dots.col], type: 'scatter', pointRadius: 1.3, pointHoverRadius: 3, backgroundColor: 'rgba(255,255,255,0.65)', order: 1 });
+  datasets.push({ label: v.line.name, data: S[v.line.col], borderColor: '#f0885a', borderWidth: 1.3, pointRadius: 0, pointHoverRadius: 3, fill: v.fillArea ? { target: 'start', above: 'rgba(240,136,90,0.12)' } : false, spanGaps: false, order: 2 });
+  if (v.ref) datasets.push({ label: v.ref.name, data: S.dates.map(() => v.ref.value), borderColor: 'rgba(255,255,255,0.4)', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, pointHoverRadius: 0, order: 3 });
+  document.getElementById('charts-note').textContent = v.note;
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('chart'), {
+    type: 'line', data: { labels: S.dates, datasets }, plugins: [markerPlugin],
+    options: {
+      animation: false, responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      onClick: (e, els, c) => { const i = Math.round(c.scales.x.getValueForPixel(e.x)); if (S.dates[i]) setDate(fromISO(S.dates[i])); },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: 'rgba(255,255,255,0.75)', font: { family: 'JetBrains Mono', size: 11 }, autoSkip: false, maxRotation: 0,
+             callback: (val, i) => S.dates[i].endsWith('-01-01') ? S.dates[i].slice(0, 4) : null } },
+        y: { min: v.min, max: v.max, title: { display: true, text: v.y, color: 'rgba(255,255,255,0.75)', font: { family: 'Inter', size: 12 } },
+             grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: 'rgba(255,255,255,0.75)', font: { family: 'JetBrains Mono', size: 11 }, maxTicksLimit: 5 } },
+      },
+      plugins: {
+        legend: { display: true, position: 'top', align: 'end', labels: { color: 'rgba(255,255,255,0.8)', boxWidth: 10, boxHeight: 2, font: { family: 'Inter', size: 12 } } },
+        tooltip: { backgroundColor: 'rgba(10,12,20,0.92)', titleFont: { family: 'JetBrains Mono', size: 12 }, bodyFont: { family: 'JetBrains Mono', size: 12 },
+                   filter: item => item.dataset.pointHoverRadius > 0 && item.raw != null, callbacks: { label: item => ` ${item.dataset.label}: ${v.fmt(item.raw)}` } },
+      },
+    },
+  });
+  updateMarker();
+}
+
+function updateMarker() {
+  if (!chart) return;
+  const v = VARIABLES[variable], i = S.index[toISO(currentDate)], val = i === undefined ? null : S[v.line.col][i];
+  document.getElementById('charts-value').textContent = val == null ? '' : `${toISO(currentDate)}  ${v.fmt(val)}`;
+  chart.draw();
+}
+
+function setChartsCollapsed(c) {
+  document.getElementById('charts').classList.toggle('collapsed', c);
+  document.getElementById('charts-toggle').textContent = c ? 'Expand' : 'Collapse';
+  const lb = document.querySelector('.leaflet-bottom'); if (lb) lb.style.bottom = c ? '70px' : '260px';
+}
+document.getElementById('charts-toggle').onclick = () => setChartsCollapsed(!document.getElementById('charts').classList.contains('collapsed'));
+
+// ── sidebar collapse ─────────────────────────────────────────────────────────
+const sidebarEl = document.getElementById('sidebar'), sidebarToggle = document.getElementById('sidebar-toggle');
+sidebarToggle.onclick = () => { sidebarToggle.innerHTML = sidebarEl.classList.toggle('collapsed') ? '&#8250;' : '&#8249;'; };
+// Small screens: tuck the chrome away so the map owns the view (the date arrows stay visible).
+if (window.innerWidth < 760) { sidebarEl.classList.add('collapsed'); sidebarToggle.innerHTML = '&#8250;'; }   // the chart panel always starts collapsed (see HTML)
+
+</script>
+</body>
+</html>
