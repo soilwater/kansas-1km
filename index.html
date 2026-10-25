@@ -253,7 +253,7 @@ const MAPS_PATH    = 'png/';                                   // faw_YYYYMMDD.p
 const BOUNDS       = [[36.99262, -102.05760], [40.01096, -94.58362]];   // [[south, west], [north, east]] of the model grid (mask.tif)
 const SUMMARY_URL  = 'summary.csv';                            // date, faw_map, storage_km3, faw_stations, n_stations
 const COUNTIES_URL = 'boundaries/kansas_county_bnd.geojson';
-const MIN_DATE = new Date('2017-10-15T12:00:00');
+const MIN_DATE = new Date('2017-10-01T12:00:00');
 const PAW_BASE_KM3 = 19.300, PAW_CAPACITY_KM3 = 30.230;       // ΣLL·area (below-wilting base subtracted from storage_km3) / ΣTAW·area (plant-available water at field capacity)
 const MIN_STATIONS = 30;                                       // station mean is shown only when at least this many stations report
 
@@ -568,7 +568,9 @@ const markerPlugin = {                                             // vertical l
 };
 
 fetch(SUMMARY_URL).then(r => r.text()).then(txt => {
-  const rows = txt.trim().split('\n').map(l => l.trim().split(',')), head = rows.shift();
+  let rows = txt.trim().split('\n').map(l => l.trim().split(','));
+  const head = rows.shift();
+  rows = rows.filter(r => r[0] >= toISO(MIN_DATE));                 // the page starts at MIN_DATE; earlier rows are model spin-up
   const col = name => rows.map(r => { const v = parseFloat(r[head.indexOf(name)]); return isFinite(v) ? v : null; });
   S = { dates: rows.map(r => r[0]), index: {} };
   head.slice(1).forEach(name => S[name] = col(name));
