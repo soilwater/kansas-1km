@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL15BB37L1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DL15BB37L1');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kansas Soil Water Atlas</title>
+<meta name="description" content="Kansas soil water, 2002–2026: how much plant available water the top two feet of Kansas soil held every day since 2002, mapped at 1 km.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #121212; --text: #333; --muted: #727272; --rule: #dfdfdf; --soft: #f7f7f5; --dry: #c8783a; --wet: #2c7fb8; --link: #326891; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: #fff; color: var(--ink); font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; }
+  a { color: var(--link); }
+  .sans { font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; }
+  nav.top { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--rule); }
+  nav.top .in { max-width: 1080px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 22px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 13px; }
+  nav.top .brand { font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 12px; color: var(--ink); text-decoration: none; margin-right: auto; }
+  nav.top a.l { color: var(--text); text-decoration: none; }
+  nav.top a.l:hover { color: var(--ink); text-decoration: underline; }
+  @media (max-width: 700px) { nav.top a.sec { display: none; } }
+  header.hero { max-width: 760px; margin: 0 auto; padding: 46px 20px 8px; }
+  .kicker { font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dry); }
+  h1 { font-weight: 700; font-size: clamp(34px, 5.4vw, 52px); line-height: 1.06; margin: 10px 0 14px; letter-spacing: -.01em; }
+  .dek { font-size: clamp(19px, 2.4vw, 23px); line-height: 1.38; color: var(--text); margin: 0 0 18px; }
+  .byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 13px; color: var(--muted); line-height: 1.5; border-top: 1px solid var(--rule); padding-top: 12px; }
+  .byline b { color: var(--ink); font-weight: 600; }
+  .prose { max-width: 680px; margin: 0 auto; padding: 0 20px; font-size: 19px; line-height: 1.6; color: #222; }
+  .prose p { margin: 0 0 1.05em; }
+  .stats { max-width: 1040px; margin: 34px auto 10px; padding: 0 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); }
+  .stat { padding: 16px 16px 18px 0; }
+  .stat + .stat { padding-left: 16px; border-left: 1px solid var(--rule); }
+  .stat .n { font-weight: 700; font-size: 34px; line-height: 1.05; }
+  .stat .n small { font-size: 17px; font-weight: 600; }
+  .stat .t { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 13px; line-height: 1.4; color: var(--text); margin-top: 6px; }
+  .stat.dry .n { color: var(--dry); } .stat.wet .n { color: var(--wet); }
+  @media (max-width: 760px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat:nth-child(3) { border-left: 0; padding-left: 0; } .stat:nth-child(n+3) { border-top: 1px solid var(--rule); } }
+  section.chapter { margin-top: 64px; }
+  h2 { max-width: 680px; margin: 0 auto 14px; padding: 0 20px; font-size: clamp(26px, 3.4vw, 32px); line-height: 1.15; font-weight: 700; }
+  h2 .num { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  figure { margin: 30px auto 38px; padding: 0 20px; max-width: 1080px; }
+  figure.narrow { max-width: 760px; }
+  figure .ft { font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 17px; margin: 0 0 3px; }
+  figure .fs { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 14px; color: var(--text); margin: 0 0 12px; line-height: 1.4; }
+  figure img { width: 100%; height: auto; display: block; }
+  figcaption { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 13px; line-height: 1.45; color: var(--muted); margin-top: 10px; display: flex; gap: 16px; justify-content: space-between; align-items: baseline; }
+  figcaption a { white-space: nowrap; color: var(--muted); }
+  figcaption a:hover { color: var(--ink); }
+  table.events { width: 100%; border-collapse: collapse; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 14px; font-variant-numeric: tabular-nums; }
+  table.events th { text-align: right; font-weight: 600; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--ink); padding: 6px 8px; }
+  table.events td { text-align: right; border-bottom: 1px solid var(--rule); padding: 7px 8px; }
+  table.events th:first-child, table.events td:first-child { text-align: left; }
+  .years { max-width: 1080px; margin: 18px auto 0; padding: 0 20px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .years button { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 13px; font-weight: 500; border: 1px solid var(--rule); background: #fff; color: var(--text); border-radius: 3px; padding: 5px 9px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .years button:hover { border-color: #999; }
+  .years button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .yearbox { max-width: 1080px; margin: 18px auto 0; padding: 0 20px; }
+  .yearbox h3 { font-size: 28px; margin: 6px 0 6px; }
+  .yearbox p { max-width: 680px; font-size: 18px; line-height: 1.55; color: #222; margin: 0 0 14px; }
+  .about { background: var(--soft); margin-top: 80px; padding: 46px 0 60px; border-top: 1px solid var(--rule); }
+  .about .prose { font-size: 16px; line-height: 1.6; }
+  .about h2 { padding: 0 20px; }
+  .about h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; margin: 26px 0 8px; }
+  .about ul { padding-left: 20px; margin: 0; }
+  .about li { margin: 4px 0; }
+  footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 12px; color: var(--muted); max-width: 680px; margin: 0 auto; padding: 24px 20px 40px; }
+</style>
+</head>
+<body>
+<nav class="top"><div class="in">
+  <a class="brand" href="#top">Kansas Soil Water Atlas</a>
+  <a class="l sec" href="#glance">At a glance</a><a class="l sec" href="#reservoir">Reservoir</a><a class="l sec" href="#years">Every year</a><a class="l sec" href="#space">Across the state</a><a class="l sec" href="#droughts">Droughts</a><a class="l sec" href="#lookup">Look up a year</a>
+  <a class="l" href="index.html">Daily map</a>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="kicker">Kansas soil water, 2002–2026</div>
+  <h1>Kansas Soil Water Atlas</h1>
+  <p class="dek">How much water the top two feet of Kansas soil held, every day since 2002, and where, when and for how long it ran short.</p>
+  <div class="byline"><b>Soil Water Processes Lab</b>, Department of Agronomy, Kansas State University · Daily data from Jan. 1, 2002 to Nov. 3, 2026 · Updated Nov. 5, 2026</div>
+</header>
+
+<div class="prose" style="margin-top:26px">
+  <p>Every map and chart on this page comes from one number: the <b>fraction of plant available water</b> (FAW) in the top 60 centimeters (2 feet) of soil, calculated each day on a 1-kilometer grid across Kansas. At 0, plants can no longer pull water from the soil; at 1, the profile is full.</p>
+  <p>To capture both how dry it got and for how long, the atlas counts <b>FAW-days</b>. Each day below FAW 0.5 adds its shortfall to the year's <b style="color:var(--dry)">deficit-days</b>, and each day above 0.5 adds its excess to the <b style="color:var(--wet)">surplus-days</b>. Ten days at FAW 0.3 make 2 deficit-days, and so do 40 days at 0.45.</p>
+</div>
+
+<div class="stats"><div class="stat dry"><div class="n">71</div><div class="t">deficit-days in 2022, the driest year since 2002</div></div><div class="stat wet"><div class="n">82</div><div class="t">surplus-days in 2019, the wettest year</div></div><div class="stat "><div class="n">3.7<small> km³</small></div><div class="t">of plant available water on Oct. 24, 2022, the least in the record</div></div><div class="stat "><div class="n">29.3<small> km³</small></div><div class="t">on May 27, 2019, the most, out of 30.2 km³ the soil can hold</div></div></div>
+
+<section class="chapter" id="glance"><h2><span class="num">Chapter 1</span>Twenty-five years at a glance</h2><div class="prose"><p>Each row is a year and each cell is a week. Kansas soils dry out in summer and fall and recharge from late fall through spring, so most years run red in the second half. The long red bands of 2011–2012 and 2022–2023 are the two great droughts of the record; the wettest springs came in 2007, 2016 and 2019.</p></div><figure class=""><div class="ft">The state, week by week</div><div class="fs">Statewide median FAW for each week since 2002</div><img src="atlas/img/glance_weekly_median.png?v=20261105" alt="The state, week by week" loading="lazy"><figcaption><span>Weeks are seven-day periods starting Jan. 1. Blank cells: weeks after Nov. 3, 2026.</span><a href="atlas/img/glance_weekly_median.png" download>Download PNG</a></figcaption></figure><figure class=""><div class="ft">How fast deficit and surplus piled up</div><div class="fs">Statewide deficit-days and surplus-days added each week</div><img src="atlas/img/glance_weekly_faw_days.png?v=20261105" alt="How fast deficit and surplus piled up" loading="lazy"><figcaption><span>A week with all of Kansas at FAW 0 would add 3.5 deficit-days.</span><a href="atlas/img/glance_weekly_faw_days.png" download>Download PNG</a></figcaption></figure><figure class=""><div class="ft">The yearly ledger</div><div class="fs">Deficit-days and surplus-days per calendar year, statewide</div><img src="atlas/img/glance_annual_ledger.png?v=20261105" alt="The yearly ledger" loading="lazy"><figcaption><span>The line is the net: surplus minus deficit. Most years carry both; even 2019 had 12 deficit-days.</span><a href="atlas/img/glance_annual_ledger.png" download>Download PNG</a></figcaption></figure></section>
+<section class="chapter" id="reservoir"><h2><span class="num">Chapter 2</span>The soil reservoir</h2><div class="prose"><p>Multiplying FAW by the water each soil can hold gives the volume of plant available water stored across the state. Full, the top two feet of Kansas soil hold about 30 cubic kilometers (25 million acre-feet). Since 2002 the reservoir has swung between 4 and 29 km³.</p></div><figure class=""><div class="ft">Stored plant available water, 2002–present</div><div class="fs">Daily total for the top 60 cm across Kansas</div><img src="atlas/img/reservoir_timeseries.png?v=20261105" alt="Stored plant available water, 2002–present" loading="lazy"><figcaption><span>Right axis in million acre-feet.</span><a href="atlas/img/reservoir_timeseries.png" download>Download PNG</a></figcaption></figure><figure class=""><div class="ft">Where the water was</div><div class="fs">Stored water in the weeks with the least and the most water of the record</div><img src="atlas/img/reservoir_where.png?v=20261105" alt="Where the water was" loading="lazy"><figcaption><span>Both maps share one color scale.</span><a href="atlas/img/reservoir_where.png" download>Download PNG</a></figcaption></figure></section>
+<section class="chapter" id="years"><h2><span class="num">Chapter 3</span>Every year since 2002</h2><div class="prose"><p>Each dial is one year, read clockwise from Jan. 1 at the top. The line is the statewide median FAW; orange fills the shortfall below 0.5 and blue the excess above it. The numbers are the year’s deficit-days and surplus-days.</p></div><figure class=""><div class="ft">Twenty-five years of soil water</div><div class="fs">Statewide median FAW, day by day</div><img src="atlas/img/years_dials.png?v=20261105" alt="Twenty-five years of soil water" loading="lazy"><figcaption><span>* 2026 through Nov. 3, 2026.</span><a href="atlas/img/years_dials.png" download>Download PNG</a></figcaption></figure><figure class=""><div class="ft">The race to the end of the year</div><div class="fs">Running totals through each year; the three largest years and the latest year are labeled</div><img src="atlas/img/years_running_totals.png?v=20261105" alt="The race to the end of the year" loading="lazy"><figcaption><span>Grey lines are the other years.</span><a href="atlas/img/years_running_totals.png" download>Download PNG</a></figcaption></figure><figure class="narrow"><div class="ft">All years in one circle</div><div class="fs">The weekly medians of the first chart wrapped into rings, 2002 at the center</div><img src="atlas/img/years_rings.png?v=20261105" alt="All years in one circle" loading="lazy"><figcaption><span>Each ring is a year and each wedge a week.</span><a href="atlas/img/years_rings.png" download>Download PNG</a></figcaption></figure></section>
+<section class="chapter" id="space"><h2><span class="num">Chapter 4</span>Across the state</h2><div class="prose"><p>Kansas gets nearly three times more rain in the southeast than in the far west (about 430 to 1,200 millimeters a year), and its soils follow. The west carries most of the deficit-days and the east most of the surplus-days, but drought years reach across the whole state.</p></div><figure class=""><div class="ft">A typical year</div><div class="fs">Median deficit-days and surplus-days per year at each 1-km pixel, 2002–2025</div><img src="atlas/img/space_typical_year.png?v=20261105" alt="A typical year" loading="lazy"><figcaption><span>Maps smoothed over about 15 km.</span><a href="atlas/img/space_typical_year.png" download>Download PNG</a></figcaption></figure><figure class=""><div class="ft">West to east, week by week</div><div class="fs">Mean FAW of each north–south strip of Kansas, from the Colorado border (bottom) to Missouri (top)</div><img src="atlas/img/space_west_east.png?v=20261105" alt="West to east, week by week" loading="lazy"><figcaption><span>Each column is a week.</span><a href="atlas/img/space_west_east.png" download>Download PNG</a></figcaption></figure><figure class=""><div class="ft">How much of Kansas was dry</div><div class="fs">Share of the state in each FAW class, weekly</div><img src="atlas/img/space_area_classes.png?v=20261105" alt="How much of Kansas was dry" loading="lazy"><figcaption><span>Red classes are the driest.</span><a href="atlas/img/space_area_classes.png" download>Download PNG</a></figcaption></figure></section>
+<section class="chapter" id="droughts"><h2><span class="num">Chapter 5</span>Droughts</h2><div class="prose"><p>Treating each drought as one connected region of dry soil (FAW below 0.2) in space and time gives 29 events since 2002 that lasted at least four weeks and covered at least 5 percent of Kansas at their peak. Bubble size is the peak area; color is the total deficit, in statewide FAW-days.</p></div><figure class=""><div class="ft">Every drought since 2002</div><div class="fs">Start date and duration of each event</div><img src="atlas/img/droughts_events.png?v=20261105" alt="Every drought since 2002" loading="lazy"><figcaption><span>Duration counts the weeks from the first to the last week in which any part of the event was below 0.2, so an event that shrinks over winter and grows again the next summer counts once.</span><a href="atlas/img/droughts_events.png" download>Download PNG</a></figcaption></figure><figure class="narrow"><div class="ft">The largest droughts</div><div class="fs">Ranked by total deficit</div><table class="events"><tr><th>Start</th><th>End</th><th>Weeks</th><th>Peak share of Kansas</th><th>Deficit (FAW-days)</th></tr><tr><td>May 7, 2022</td><td>June 10, 2023</td><td>57</td><td>75%</td><td>52.7</td></tr><tr><td>June 4, 2010</td><td>Dec. 16, 2011</td><td>80</td><td>41%</td><td>37.8</td></tr><tr><td>May 20, 2012</td><td>Oct. 14, 2013</td><td>73</td><td>78%</td><td>36.2</td></tr><tr><td>July 2, 2003</td><td>April 21, 2004</td><td>42</td><td>66%</td><td>27.6</td></tr><tr><td>June 25, 2007</td><td>Oct. 13, 2008</td><td>68</td><td>33%</td><td>21.0</td></tr><tr><td>June 11, 2023</td><td>Feb. 4, 2024</td><td>34</td><td>57%</td><td>19.8</td></tr></table></figure></section>
+
+<section class="chapter" id="lookup">
+  <h2><span class="num">Chapter 6</span>Look up a year</h2>
+  <div class="prose"><p>For each year: the statewide dial, where deficit-days and surplus-days piled up, and the average FAW of each month.</p></div>
+  <div class="years" id="yearButtons"></div>
+  <div class="yearbox">
+    <h3 id="yearTitle"></h3>
+    <p id="yearText"></p>
+    <figure style="padding:0;margin:8px 0 0;max-width:none">
+      <img id="yearImg" alt="">
+      <figcaption><span>Monthly maps average the weeks whose middle day falls in the month. Deficit-day and surplus-day maps use the same scale every year.</span><a id="yearDl" download>Download PNG</a></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <h2><span class="num">About the data</span>How the atlas is made</h2>
+  <div class="prose">
+    <p>FAW comes from the Kansas 1-km soil moisture model behind the <a href="index.html">daily map</a>. A daily soil water balance is driven by PRISM rainfall and a seasonal drying rate calibrated from the Kansas Mesonet, run on soil limits from USDA-SSURGO soil texture, and adjusted toward the Mesonet stations each day. The record starts Jan. 1, 2002 and is rerun from the start when the model changes.</p>
+    <p>Statewide values are area-weighted over the 273,579 pixels of Kansas. Weeks are fixed seven-day periods starting Jan. 1 (week 52 also takes Dec. 30–31), and years are calendar years. Deficit-days and surplus-days use 0.5 as the reference. Stored water is FAW times each pixel's plant available water capacity (water held between −10 kPa and the wilting point), summed over the state.</p>
+    <h4>Downloads</h4>
+    <ul><li><a href="atlas/files/statewide_daily.csv?v=20261105" download>statewide_daily.csv</a>: statewide values for every day since 2002: area-weighted mean and percentiles (5th to 95th) of FAW, deficit-days, surplus-days, share of Kansas below 0.5 and in each FAW class, and stored plant available water (km³)</li><li><a href="atlas/files/annual_faw_days.csv?v=20261105" download>annual_faw_days.csv</a>: deficit-days, surplus-days and net per calendar year, with the statewide median FAW</li><li><a href="atlas/files/drought_events.csv?v=20261105" download>drought_events.csv</a>: every drought event in the chart above: start, end, peak week, duration, peak share of Kansas (%) and deficit (statewide FAW-days)</li><li>Every figure: use the Download PNG link under it.</li></ul>
+    <h4>Cite</h4>
+    <p>Soil Water Processes Lab (2026). <i>Kansas Soil Water Atlas, 2002–2026.</i> Department of Agronomy, Kansas State University.</p>
+  </div>
+</section>
+<footer>Built Nov. 5, 2026 from the model run of Nov. 3, 2026. The atlas is regenerated once a year.</footer>
+
+<script>
+const YEARS = {"2002": {"title": "2002", "text": "33 deficit-days and 45 surplus-days: the 14th most deficit-days and the 12th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 6.1 km\u00b3 (July 27) to 25.1 km\u00b3 (Feb. 1), and the statewide median FAW from 0.17 (July 27) to 0.80 (Feb. 1).", "img": "atlas/img/year_2002.png?v=20261105"}, "2003": {"title": "2003", "text": "42 deficit-days and 33 surplus-days: the 5th most deficit-days and the 18th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 4.8 km\u00b3 (Aug. 18) to 23.3 km\u00b3 (April 25), and the statewide median FAW from 0.15 (Aug. 18) to 0.89 (April 25).", "img": "atlas/img/year_2003.png?v=20261105"}, "2004": {"title": "2004", "text": "33 deficit-days and 46 surplus-days: the 13th most deficit-days and the 9th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 8.8 km\u00b3 (Sept. 21) to 23.9 km\u00b3 (July 6), and the statewide median FAW from 0.27 (Sept. 21) to 0.91 (March 5).", "img": "atlas/img/year_2004.png?v=20261105"}, "2005": {"title": "2005", "text": "22 deficit-days and 45 surplus-days: the 20th most deficit-days and the 11th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 8.5 km\u00b3 (Aug. 11) to 24.9 km\u00b3 (June 13), and the statewide median FAW from 0.27 (Aug. 11) to 0.96 (June 13).", "img": "atlas/img/year_2005.png?v=20261105"}, "2006": {"title": "2006", "text": "41 deficit-days and 17 surplus-days: the 8th most deficit-days and the 24th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 8.0 km\u00b3 (Aug. 13) to 25.5 km\u00b3 (Dec. 31), and the statewide median FAW from 0.26 (Aug. 13) to 0.88 (Dec. 31).", "img": "atlas/img/year_2006.png?v=20261105"}, "2007": {"title": "2007", "text": "27 deficit-days and 71 surplus-days: the 17th most deficit-days and the 2nd most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 9.6 km\u00b3 (Sept. 15) to 28.8 km\u00b3 (March 31), and the statewide median FAW from 0.29 (Sept. 15) to 0.99 (March 31).", "img": "atlas/img/year_2007.png?v=20261105"}, "2008": {"title": "2008", "text": "24 deficit-days and 65 surplus-days: the 19th most deficit-days and the 3rd most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 10.9 km\u00b3 (July 26) to 27.1 km\u00b3 (Oct. 23), and the statewide median FAW from 0.37 (July 26) to 0.96 (Oct. 23).", "img": "atlas/img/year_2008.png?v=20261105"}, "2009": {"title": "2009", "text": "16 deficit-days and 50 surplus-days: the 22nd most deficit-days and the 5th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 11.4 km\u00b3 (Aug. 15) to 24.6 km\u00b3 (April 19), and the statewide median FAW from 0.37 (Aug. 15) to 0.90 (April 19).", "img": "atlas/img/year_2009.png?v=20261105"}, "2010": {"title": "2010", "text": "28 deficit-days and 46 surplus-days: the 16th most deficit-days and the 10th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 8.9 km\u00b3 (Nov. 11) to 23.9 km\u00b3 (June 14), and the statewide median FAW from 0.27 (Nov. 11) to 0.90 (June 14).", "img": "atlas/img/year_2010.png?v=20261105"}, "2011": {"title": "2011", "text": "53 deficit-days and 26 surplus-days: the 3rd most deficit-days and the 21st most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 7.0 km\u00b3 (Sept. 16) to 21.7 km\u00b3 (Dec. 21), and the statewide median FAW from 0.21 (Sept. 16) to 0.73 (Dec. 21).", "img": "atlas/img/year_2011.png?v=20261105"}, "2012": {"title": "2012", "text": "49 deficit-days and 37 surplus-days: the 4th most deficit-days and the 17th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 4.0 km\u00b3 (Aug. 23) to 25.7 km\u00b3 (April 5), and the statewide median FAW from 0.12 (Aug. 23) to 0.95 (March 23).", "img": "atlas/img/year_2012.png?v=20261105"}, "2013": {"title": "2013", "text": "41 deficit-days and 33 surplus-days: the 6th most deficit-days and the 19th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 7.6 km\u00b3 (July 19) to 21.4 km\u00b3 (Aug. 8), and the statewide median FAW from 0.24 (July 19) to 0.76 (Aug. 8).", "img": "atlas/img/year_2013.png?v=20261105"}, "2014": {"title": "2014", "text": "41 deficit-days and 27 surplus-days: the 7th most deficit-days and the 20th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 9.5 km\u00b3 (May 21) to 22.2 km\u00b3 (June 15), and the statewide median FAW from 0.28 (May 11) to 0.81 (June 15).", "img": "atlas/img/year_2014.png?v=20261105"}, "2015": {"title": "2015", "text": "34 deficit-days and 40 surplus-days: the 12th most deficit-days and the 16th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 6.9 km\u00b3 (Oct. 21) to 26.6 km\u00b3 (May 25), and the statewide median FAW from 0.21 (Oct. 21) to 0.97 (May 24).", "img": "atlas/img/year_2015.png?v=20261105"}, "2016": {"title": "2016", "text": "20 deficit-days and 63 surplus-days: the 21st most deficit-days and the 4th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 10.8 km\u00b3 (Dec. 25) to 28.7 km\u00b3 (April 30), and the statewide median FAW from 0.39 (Dec. 3) to 0.98 (April 30).", "img": "atlas/img/year_2016.png?v=20261105"}, "2017": {"title": "2017", "text": "31 deficit-days and 50 surplus-days: the 15th most deficit-days and the 6th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 8.4 km\u00b3 (July 26) to 28.2 km\u00b3 (May 1), and the statewide median FAW from 0.25 (Aug. 4) to 0.99 (April 5).", "img": "atlas/img/year_2017.png?v=20261105"}, "2018": {"title": "2018", "text": "25 deficit-days and 49 surplus-days: the 18th most deficit-days and the 8th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 10.3 km\u00b3 (July 25) to 28.8 km\u00b3 (Oct. 10), and the statewide median FAW from 0.34 (July 25) to 0.98 (Oct. 10).", "img": "atlas/img/year_2018.png?v=20261105"}, "2019": {"title": "2019", "text": "12 deficit-days and 82 surplus-days: the 24th most deficit-days and the 1st most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 11.3 km\u00b3 (July 31) to 29.3 km\u00b3 (May 27), and the statewide median FAW from 0.38 (Aug. 1) to 0.99 (May 27).", "img": "atlas/img/year_2019.png?v=20261105"}, "2020": {"title": "2020", "text": "38 deficit-days and 43 surplus-days: the 9th most deficit-days and the 13th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 4.8 km\u00b3 (Oct. 26) to 24.2 km\u00b3 (Feb. 26), and the statewide median FAW from 0.17 (Oct. 26) to 0.85 (Feb. 26).", "img": "atlas/img/year_2020.png?v=20261105"}, "2021": {"title": "2021", "text": "35 deficit-days and 40 surplus-days: the 11th most deficit-days and the 15th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 8.6 km\u00b3 (Sept. 29) to 26.4 km\u00b3 (March 24), and the statewide median FAW from 0.28 (Sept. 29) to 0.90 (March 24).", "img": "atlas/img/year_2021.png?v=20261105"}, "2022": {"title": "2022", "text": "71 deficit-days and 21 surplus-days: the 1st most deficit-days and the 22nd most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 3.7 km\u00b3 (Oct. 24) to 21.5 km\u00b3 (June 8), and the statewide median FAW from 0.10 (Oct. 24) to 0.89 (May 26).", "img": "atlas/img/year_2022.png?v=20261105"}, "2023": {"title": "2023", "text": "63 deficit-days and 20 surplus-days: the 2nd most deficit-days and the 23rd most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 5.3 km\u00b3 (Oct. 24) to 18.4 km\u00b3 (June 4), and the statewide median FAW from 0.16 (Oct. 24) to 0.61 (June 4).", "img": "atlas/img/year_2023.png?v=20261105"}, "2024": {"title": "2024", "text": "36 deficit-days and 42 surplus-days: the 10th most deficit-days and the 14th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 4.0 km\u00b3 (Oct. 30) to 26.0 km\u00b3 (Feb. 6), and the statewide median FAW from 0.12 (Oct. 30) to 0.90 (Feb. 6).", "img": "atlas/img/year_2024.png?v=20261105"}, "2025": {"title": "2025", "text": "14 deficit-days and 50 surplus-days: the 23rd most deficit-days and the 7th most surplus-days of the 24 full years since 2002. Statewide stored water ranged from 11.2 km\u00b3 (Aug. 24) to 22.8 km\u00b3 (June 7), and the statewide median FAW from 0.36 (Aug. 24) to 0.84 (June 8).", "img": "atlas/img/year_2025.png?v=20261105"}};
+const box = document.getElementById('yearButtons');
+function show(y, clicked) {
+  const d = YEARS[y];
+  document.getElementById('yearTitle').textContent = d.title;
+  document.getElementById('yearText').textContent = d.text;
+  const img = document.getElementById('yearImg'); img.src = d.img; img.alt = 'Soil water in Kansas, ' + y;
+  document.getElementById('yearDl').href = d.img.split('?')[0];
+  box.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.y === String(y)));
+  if (clicked) history.replaceState(null, '', '#year-' + y);    // shareable link to a year
+}
+Object.keys(YEARS).forEach(y => { const b = document.createElement('button'); b.textContent = y; b.dataset.y = y; b.onclick = () => show(y, true); box.appendChild(b); });
+const fromHash = (location.hash.match(/^#year-(\d{4})$/) || [])[1];
+show(fromHash && YEARS[fromHash] ? fromHash : Object.keys(YEARS).pop());    // default: the latest complete year
+if (fromHash) document.getElementById('lookup').scrollIntoView();
+</script>
+</body>
+</html>
