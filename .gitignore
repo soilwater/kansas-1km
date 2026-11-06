@@ -18,11 +18,3 @@ png/faw_201[0-6]*.png
 !infographics/*.html
 !infographics/*.pdf
 infographics/Callihan_ku_0099M_13190_DATA_1.pdf
-# Kansas Soil Water Atlas: the page, its figures and its download files (code and data in atlas/ stay out)
-!atlas.html
-!atlas/
-!atlas/img/
-!atlas/img/*.png
-!atlas/img/*.webp
-!atlas/files/
-!atlas/files/*.csv
