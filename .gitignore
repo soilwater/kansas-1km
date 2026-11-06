@@ -23,5 +23,6 @@ infographics/Callihan_ku_0099M_13190_DATA_1.pdf
 !atlas/
 !atlas/img/
 !atlas/img/*.png
+!atlas/img/*.webp
 !atlas/files/
 !atlas/files/*.csv
